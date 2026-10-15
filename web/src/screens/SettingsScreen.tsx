@@ -1,8 +1,12 @@
 import type { AuthProvider } from '@freeappstore/sdk'
 import { ConfirmDialog, PageHeader } from '@freeappstore/sdk/ui'
-import { type FormEvent, type ReactNode, useEffect, useId, useState } from 'react'
+import { type FormEvent, useEffect, useId, useState } from 'react'
 import { dangerButton, primaryButton, secondaryButton } from '../components/buttons'
+import { Busy, ErrorText, PassphraseField, input, useAction } from '../components/form'
+import { localToday } from '../dates'
 import { fas } from '../fas'
+import { BackupSection } from './settings/BackupSection'
+import { ReportSection } from './settings/ReportSection'
 import { SyncEngine, type SyncStatus, syncEngine, useSyncStatus } from '../sync'
 
 /** The parts of fas.auth the screen uses. */
@@ -15,14 +19,20 @@ export interface SettingsAuth {
 }
 
 const card = 'rounded-[var(--radius)] border border-[var(--line)] bg-[var(--panel)] p-4'
-const input =
-  'w-full rounded-[var(--radius-sm)] border border-[var(--line-strong)] bg-[var(--panel-strong)] px-3 py-2 text-base text-[var(--ink)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sky)]'
 const MIN_PASSPHRASE = 8
 
 const REMEMBER_HELP =
   "Keeps the encryption key (never the passphrase) in this browser, in a form that can't be copied out, so you don't have to type the passphrase each time you open Cycle. Anyone who can use this browser profile could then sync your data, so leave it off on shared devices."
 
-export function SettingsScreen({ engine = syncEngine, auth = fas.auth }: { engine?: SyncEngine; auth?: SettingsAuth }) {
+export function SettingsScreen({
+  engine = syncEngine,
+  auth = fas.auth,
+  today = localToday(),
+}: {
+  engine?: SyncEngine
+  auth?: SettingsAuth
+  today?: string
+}) {
   const [user, setUser] = useState(auth.user)
   useEffect(() => auth.onChange(setUser), [auth])
 
@@ -41,6 +51,9 @@ export function SettingsScreen({ engine = syncEngine, auth = fas.auth }: { engin
           </p>
           {user ? <SignedIn engine={engine} auth={auth} login={user.login} /> : <SignedOut engine={engine} auth={auth} />}
         </section>
+
+        <BackupSection engine={engine} today={today} />
+        <ReportSection today={today} />
 
         <p className="m-0 text-sm text-[var(--muted)]">
           Cycle is a free, MIT-licensed app on{' '}
@@ -145,65 +158,6 @@ function SignedIn({ engine, auth, login }: { engine: SyncEngine; auth: SettingsA
   )
 }
 
-/** Runs an async action with busy and error state. */
-function useAction() {
-  const [busy, setBusy] = useState(false)
-  const [error, setError] = useState<string>()
-  const run = async (fn: () => Promise<unknown>) => {
-    setBusy(true)
-    setError(undefined)
-    try {
-      await fn()
-      return true
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err))
-      return false
-    } finally {
-      setBusy(false)
-    }
-  }
-  return { busy, error, run }
-}
-
-function PassphraseField({
-  label,
-  value,
-  onChange,
-  autoComplete,
-  hint,
-}: {
-  label: string
-  value: string
-  onChange: (v: string) => void
-  autoComplete: 'new-password' | 'current-password'
-  hint?: string
-}) {
-  const id = useId()
-  return (
-    <div>
-      <label htmlFor={id} className="mb-1 block text-sm font-bold">
-        {label}
-      </label>
-      <input
-        id={id}
-        type="password"
-        required
-        minLength={autoComplete === 'new-password' ? MIN_PASSPHRASE : 1}
-        autoComplete={autoComplete}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        aria-describedby={hint ? `${id}-hint` : undefined}
-        className={input}
-      />
-      {hint && (
-        <p id={`${id}-hint`} className="mb-0 mt-1 text-xs text-[var(--muted)]">
-          {hint}
-        </p>
-      )}
-    </div>
-  )
-}
-
 function RememberToggle({ checked, onChange, disabled }: { checked: boolean; onChange: (v: boolean) => void; disabled?: boolean }) {
   const id = useId()
   return (
@@ -228,18 +182,6 @@ function RememberToggle({ checked, onChange, disabled }: { checked: boolean; onC
     </div>
   )
 }
-
-const ErrorText = ({ children }: { children: ReactNode }) => (
-  <p role="alert" className="m-0 text-sm font-semibold text-[var(--danger)]">
-    {children}
-  </p>
-)
-
-const Busy = ({ busy, label }: { busy: boolean; label: string }) => (
-  <p role="status" aria-live="polite" className="m-0 text-sm text-[var(--muted)]">
-    {busy ? label : ''}
-  </p>
-)
 
 /** New passphrase + confirmation. Returns an error message, or undefined if fine. */
 function newPassphraseProblem(pass: string, confirm: string): string | undefined {

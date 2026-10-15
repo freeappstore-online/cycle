@@ -272,6 +272,15 @@ export class SyncEngine {
     this.notify()
   }
 
+  /**
+   * The unlocked sync key and its KDF metadata, for encrypted backups (#142) in
+   * the same envelope format. Undefined when sync is off or locked.
+   */
+  backupKey(): { key: CryptoKey; params: KdfParams; check: string } | undefined {
+    const { enabled, params, check } = this.state
+    return enabled && this.key && params && check ? { key: this.key, params, check } : undefined
+  }
+
   /** Re-encrypts everything under a new passphrase. Other devices will ask for it. */
   async changePassphrase(passphrase: string): Promise<void> {
     await this.loaded

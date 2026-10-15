@@ -62,7 +62,7 @@ function Screen({ path, today }: { path: string; today: string }) {
         </>
       )
     case '/settings':
-      return <SettingsScreen />
+      return <SettingsScreen today={today} />
     default:
       return <TodayScreen today={today} />
   }

@@ -4,10 +4,12 @@ import '@testing-library/jest-dom/vitest'
 import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { CycleRepoContext } from '../data/RepoContext'
 import { type CycleRepository, createCycleRepository } from '../data/repository'
 import { SyncEngine, memorySyncStateStore } from '../sync/engine'
 import { FakeKv } from '../test/fakeKv'
 import { type SettingsAuth, SettingsScreen } from './SettingsScreen'
+import fixtureV1 from '../backup/fixtures/backup-v1.json'
 
 let n = 0
 let repo: CycleRepository
@@ -35,7 +37,11 @@ function setup(user: { login: string } | null, kv = new FakeKv()) {
   repo = createCycleRepository({ dbName: `settings-${++n}`, requestPersist: () => Promise.resolve(true) })
   const auth = fakeAuth(user)
   const engine = new SyncEngine({ repo, kv, auth, store: memorySyncStateStore(), iterations: 1000 })
-  render(<SettingsScreen engine={engine} auth={auth} />)
+  render(
+    <CycleRepoContext.Provider value={repo}>
+      <SettingsScreen engine={engine} auth={auth} today="2026-10-15" />
+    </CycleRepoContext.Provider>,
+  )
   return { auth, engine, kv, user: userEvent.setup() }
 }
 
@@ -97,5 +103,44 @@ describe('SettingsScreen', () => {
 
     await user.click(screen.getByRole('button', { name: 'Forgot passphrase?' }))
     expect(screen.getByText(/nobody, including FreeAppStore, can recover it/)).toBeInTheDocument()
+  })
+
+  it('restores a backup file after preview and confirmation', async () => {
+    const { user } = setup(null)
+    await repo.putDay({ date: '2026-01-01', symptoms: ['acne'] })
+    const file = new File([JSON.stringify(fixtureV1)], 'cycle-backup.json', { type: 'application/json' })
+    await user.upload(screen.getByLabelText(/Choose a Cycle backup file/), file)
+    expect(await screen.findByText(/4 logged days and 2 periods/)).toBeInTheDocument()
+    expect(await repo.getDay('2026-08-20')).toBeUndefined()
+
+    await user.click(screen.getByRole('radio', { name: /Replace/ }))
+    await user.click(screen.getByRole('button', { name: 'Restore' }))
+    await user.click(screen.getByRole('button', { name: 'Replace' }))
+    expect(await screen.findByText(/Backup restored/)).toBeInTheDocument()
+    expect(await repo.getDay('2026-08-20')).toMatchObject({ flow: 'heavy' })
+    expect(await repo.getDay('2026-01-01')).toBeUndefined()
+  })
+
+  it('rejects a malformed file without changing anything', async () => {
+    const { user } = setup(null)
+    await repo.putDay({ date: '2026-01-01', symptoms: ['acne'] })
+    await user.upload(screen.getByLabelText(/Choose a Cycle backup file/), new File(['{"days": ['], 'broken.json', { type: 'application/json' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent(/isn't valid JSON/)
+    expect(await repo.getDay('2026-01-01')).toBeDefined()
+  })
+
+  it('offers plain backups when sync is off, encrypted once it is on', async () => {
+    const { engine } = setup({ login: 'sam' })
+    expect(screen.getByRole('radio', { name: /Encrypted/ })).toBeDisabled()
+    expect(screen.getByRole('radio', { name: /Plain JSON/ })).toBeChecked()
+    await engine.enable('river stone lantern', { remember: false })
+    await waitFor(() => expect(screen.getByRole('radio', { name: /Encrypted/ })).toBeChecked())
+  })
+
+  it('defaults the doctor summary to the last 6 months', () => {
+    setup(null)
+    expect(screen.getByLabelText('From')).toHaveValue('2026-04-15')
+    expect(screen.getByLabelText('To')).toHaveValue('2026-10-15')
+    expect(screen.getByRole('button', { name: 'Download PDF' })).toBeEnabled()
   })
 })

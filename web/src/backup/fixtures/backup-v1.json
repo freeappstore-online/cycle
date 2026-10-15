@@ -1,0 +1,16 @@
+{
+ "format": "cycle-backup",
+ "exportedAt": "2026-10-15T08:30:00.000Z",
+ "schemaVersion": 1,
+ "days": [
+  { "date": "2026-08-20", "flow": "heavy", "symptoms": ["cramps", "back_pain"], "mood": "low_energy", "updatedAt": 1786000000000 },
+  { "date": "2026-08-21", "flow": "medium", "symptoms": ["cramps"], "updatedAt": 1786000000000 },
+  { "date": "2026-09-03", "symptoms": ["headache"], "mood": "anxious", "note": "Migraine after work", "updatedAt": 1787000000000 },
+  { "date": "2026-09-17", "flow": "light", "symptoms": ["tender_breasts", "bloating"], "mood": "low_energy", "updatedAt": 1788000000000 }
+ ],
+ "periods": [
+  { "id": "6f1c2a52-6d7e-4a1d-9e1b-1c2f3a4b5c6d", "start": "2026-08-20", "end": "2026-08-24", "updatedAt": 1786000000000 },
+  { "id": "0b9d8c7e-1a2b-4c3d-8e9f-0a1b2c3d4e5f", "start": "2026-09-17", "end": "2026-09-21", "updatedAt": 1788000000000 }
+ ],
+ "settings": { "lutealLength": 13, "weekStart": 0, "defaultCycleLength": 29, "updatedAt": 1785000000000 }
+}

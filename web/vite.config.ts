@@ -3,7 +3,13 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
+// jsPDF's optional HTML/SVG renderers; the text-only PDF never loads them.
+const jspdfUnused = '/src/report/jspdf-unused.ts'
+
 export default defineConfig({
+  resolve: {
+    alias: { html2canvas: jspdfUnused, canvg: jspdfUnused, dompurify: jspdfUnused },
+  },
   plugins: [
     react(),
     tailwindcss(),
