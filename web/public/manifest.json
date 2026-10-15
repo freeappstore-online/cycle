@@ -1,10 +1,11 @@
 {
-  "name": "cycle",
-  "short_name": "cycle",
-  "description": "Free cycle app — part of FreeAppStore",
+  "name": "Cycle",
+  "short_name": "Cycle",
+  "description": "Coming soon — private period tracker",
   "start_url": "/",
   "display": "standalone",
   "orientation": "any",
+  "min_viewport_width": 320,
   "background_color": "#ffffff",
   "theme_color": "#111111",
   "icons": [

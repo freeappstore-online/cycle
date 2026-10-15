@@ -1,10 +1,20 @@
 {
   "name": "cycle",
+  "description": "Coming soon — private period tracker",
   "private": true,
   "packageManager": "pnpm@10.30.3",
-  "engines": { "node": ">=22" },
-  "pnpm": { "onlyBuiltDependencies": ["esbuild"] },
-  "repository": { "type": "git", "url": "git+https://github.com/freeappstore-online/cycle.git" },
+  "engines": {
+    "node": ">=22"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/freeappstore-online/cycle.git"
+  },
   "scripts": {
     "dev": "pnpm --filter @cycle/web dev",
     "build": "pnpm --filter @cycle/web build",
