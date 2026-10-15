@@ -19,10 +19,14 @@
     "dev": "pnpm --filter @cycle/web dev",
     "build": "pnpm --filter @cycle/web build",
     "preview": "pnpm --filter @cycle/web preview",
-    "typecheck": "pnpm --filter @cycle/web exec tsc -b",
-    "test": "pnpm --filter @cycle/web test"
+    "typecheck": "pnpm --filter @cycle/web exec tsc -b && pnpm --filter @cycle/web exec tsc -p ../e2e",
+    "test": "pnpm --filter @cycle/web test",
+    "e2e": "playwright test"
   },
   "devDependencies": {
-    "playwright": "^1.64.1"
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^26.6.5",
+    "playwright": "1.64.1"
   }
 }

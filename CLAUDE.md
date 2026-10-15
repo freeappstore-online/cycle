@@ -9,6 +9,8 @@ freeappstore-online/platform#135.
 - Dev: `pnpm install && pnpm dev`
 - Build: `pnpm build`
 - Test: `pnpm test` (Vitest + fake-indexeddb)
+- E2E: `pnpm build && pnpm e2e` (Playwright, `e2e/`; desktop + mobile, light + dark). Every test
+  fails on a request to any host but the app and `*.freeappstore.online`. Runs in CI on `main`.
 - Check: `fas check`, then `pnpm build && fas screencheck --skip-build` (its own build step
   can't spawn pnpm on Windows). The SDK Shell's skip link is flagged on every viewport;
   that's a platform issue, not the app's.

@@ -12,3 +12,7 @@ dist
 
 # fas screencheck --screenshots output
 screencheck-out/
+
+# Playwright
+test-results/
+playwright-report/
