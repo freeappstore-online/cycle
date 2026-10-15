@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
-import { initApp } from '@freeappstore/sdk'
 import { BuildInfo, type NavItem, PageHeader, Shell } from '@freeappstore/sdk/ui'
 import { AppBadge } from './components/AppBadge'
 import { useToday } from './dates'
+import { fas } from './fas'
 import { CalendarScreen } from './screens/CalendarScreen'
+import { SettingsScreen } from './screens/SettingsScreen'
 import { TodayScreen } from './screens/TodayScreen'
-
-const fas = initApp({ appId: 'cycle' })
+import { syncEngine } from './sync'
 
 // The app's screens. Shell renders them as its navbar (<nav aria-label="Main">,
 // current screen highlighted, a menu on phones). `title` becomes the browser
@@ -21,6 +21,9 @@ const NAV: NavItem[] = [
 export default function App() {
   const [path, setPath] = useState(() => window.location.pathname)
   const today = useToday()
+
+  // Optional encrypted sync: idle unless the user turned it on in Settings.
+  useEffect(() => syncEngine.start(), [])
 
   // Keep the screen in step with the browser's back and forward buttons.
   useEffect(() => {
@@ -59,19 +62,7 @@ function Screen({ path, today }: { path: string; today: string }) {
         </>
       )
     case '/settings':
-      return (
-        <>
-          <PageHeader title="Settings" description="Sync, export and about." />
-          <ComingSoon />
-          <p className="mt-4 text-[var(--muted)]">
-            Cycle is a free, MIT-licensed app on{' '}
-            <a href="https://freeappstore.online" className="underline">
-              FreeAppStore
-            </a>
-            .
-          </p>
-        </>
-      )
+      return <SettingsScreen />
     default:
       return <TodayScreen today={today} />
   }
