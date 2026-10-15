@@ -20,6 +20,6 @@
     "build": "pnpm --filter @cycle/web build",
     "preview": "pnpm --filter @cycle/web preview",
     "typecheck": "pnpm --filter @cycle/web exec tsc -b",
-    "test": "pnpm --filter @cycle/web exec tsc -b"
+    "test": "pnpm --filter @cycle/web test"
   }
 }
