@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import 'fake-indexeddb/auto'
 import '@testing-library/jest-dom/vitest'
-import { cleanup, render, screen, waitFor } from '@testing-library/react'
+import { cleanup, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { CycleRepoContext } from '../data/RepoContext'
@@ -142,5 +142,50 @@ describe('SettingsScreen', () => {
     expect(screen.getByLabelText('From')).toHaveValue('2026-04-15')
     expect(screen.getByLabelText('To')).toHaveValue('2026-10-15')
     expect(screen.getByRole('button', { name: 'Download PDF' })).toBeEnabled()
+  })
+
+  it('explains privacy under accessible headings', () => {
+    setup(null)
+    const privacy = screen.getByRole('region', { name: 'Privacy' })
+    for (const h of ['On this device', 'If you turn on sync', 'Page-view counts', 'Delete all data']) {
+      expect(within(privacy).getByRole('heading', { name: h, level: 3 })).toBeInTheDocument()
+    }
+    expect(within(privacy).getByText(/IndexedDB/)).toBeInTheDocument()
+    expect(within(privacy).getByText(/without cookies and without your account/)).toBeInTheDocument()
+    expect(within(privacy).getByText(/Cloudflare Web Analytics/)).toBeInTheDocument()
+  })
+
+  it('deletes all local and cloud data after confirmation', async () => {
+    const { user, engine, kv } = setup({ login: 'sam' })
+    await repo.putDay({ date: '2026-03-01', symptoms: ['cramps'] })
+    await engine.enable('river stone lantern', { remember: false })
+    expect(kv.data.size).toBeGreaterThan(0)
+
+    await user.click(screen.getByRole('button', { name: 'Delete all data' }))
+    expect(screen.getByText(/and the encrypted copy in your account/)).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Delete everything' }))
+    expect(await screen.findByText('All Cycle data was deleted.')).toBeInTheDocument()
+    expect(kv.data.size).toBe(0)
+    expect(await repo.getDay('2026-03-01')).toBeUndefined()
+  })
+
+  it('asks to sign in first when sync is on but signed out', async () => {
+    const { engine, auth } = setup({ login: 'sam' })
+    await engine.enable('river stone lantern', { remember: false })
+    auth.signOut()
+    expect(await screen.findByText(/sign in first \(above\) to delete the encrypted copy/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Delete all data' })).toBeDisabled()
+  })
+
+  it('re-opens the introduction from About', async () => {
+    repo = createCycleRepository({ dbName: `settings-${++n}` })
+    const onShowIntro = vi.fn()
+    render(
+      <CycleRepoContext.Provider value={repo}>
+        <SettingsScreen engine={new SyncEngine({ repo, kv: new FakeKv(), auth: fakeAuth(null), store: memorySyncStateStore() })} auth={fakeAuth(null)} today="2026-10-15" onShowIntro={onShowIntro} />
+      </CycleRepoContext.Provider>,
+    )
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Show the introduction again' }))
+    expect(onShowIntro).toHaveBeenCalled()
   })
 })

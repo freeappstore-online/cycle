@@ -1,7 +1,7 @@
 {
   "name": "Cycle",
   "short_name": "Cycle",
-  "description": "Coming soon — private period tracker",
+  "description": "A private period tracker. Your data stays on your device unless you turn on encrypted sync.",
   "start_url": "/",
   "display": "standalone",
   "orientation": "any",

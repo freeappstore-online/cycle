@@ -9,6 +9,7 @@
 import { PageHeader } from '@freeappstore/sdk/ui'
 import type { CSSProperties, ReactNode } from 'react'
 import { Bar, CartesianGrid, Cell, ComposedChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { EstimateDisclaimer } from '../components/EstimateDisclaimer'
 import { useCycleData } from '../data'
 import { formatDayMonth, formatLong, plural } from '../dates'
 import {
@@ -58,6 +59,7 @@ export default function InsightsScreen({ onNavigate }: { onNavigate?: (href: str
           <Stats stats={data.stats} />
           <CycleChart rows={data.rows} chart={data.chart} stats={data.stats} />
           <Heatmap grid={data.heatmap} />
+          <EstimateDisclaimer />
         </div>
       )}
     </>

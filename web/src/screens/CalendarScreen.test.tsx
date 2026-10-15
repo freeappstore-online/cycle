@@ -67,6 +67,9 @@ describe('CalendarScreen', () => {
     expect(fertile.length).toBeGreaterThan(0)
     expect(fertile[0]).toHaveAccessibleName(expect.stringContaining('estimated fertile window'))
     expect(screen.getByText(/not medical advice/)).toBeInTheDocument()
+    expect(screen.getByText('Do not use this app for contraception.')).toBeInTheDocument()
+    // Two complete cycles: #139 reports low confidence, and the disclaimer says so.
+    expect(screen.getByText('Low confidence:')).toBeInTheDocument()
   })
 
   it('shows a period immediately after logging it from a day', async () => {
@@ -92,7 +95,7 @@ describe('TodayScreen', () => {
     )
     expect(await screen.findByRole('heading', { name: 'Cycle day 29' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /Next period \(estimate\)/ })).toBeInTheDocument()
-    expect(screen.getByText(/Don't rely on it for contraception/)).toBeInTheDocument()
+    expect(screen.getByText('Do not use this app for contraception.')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Period started today' }))
     expect(await screen.findByRole('heading', { name: 'Period day 1' })).toBeInTheDocument()

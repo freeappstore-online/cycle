@@ -3,12 +3,13 @@
 // chunk; the PWA precaches its chunk, so this works offline too.
 
 import type { ISODate } from '../data/types'
+import { DISCLAIMER } from '../privacy/copy'
 import type { DoctorSummary } from './summary'
 
 const PAGE_W = 210
 const PAGE_H = 297
 const MARGIN = 18
-const FOOTER_H = 14
+const FOOTER_H = 18
 const LINE = 5.2
 
 /** A fixed English date ("15 Oct 2026") to match the English report text. */
@@ -179,16 +180,20 @@ export async function renderSummaryPdf(summary: DoctorSummary, { compress = true
   for (let i = 1; i <= pages; i++) {
     doc.setPage(i)
     doc.setDrawColor(200)
-    doc.line(MARGIN, PAGE_H - MARGIN - 6, PAGE_W - MARGIN, PAGE_H - MARGIN - 6)
+    doc.line(MARGIN, PAGE_H - MARGIN - 10, PAGE_W - MARGIN, PAGE_H - MARGIN - 10)
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(8)
     doc.setTextColor(100)
     doc.text(
       pdfText(`Self-reported data from the Cycle app, not a medical record. Generated ${pdfDate(summary.generatedOn)}.`),
       MARGIN,
-      PAGE_H - MARGIN - 1.5,
+      PAGE_H - MARGIN - 5.5,
     )
-    doc.text(`Page ${i} of ${pages}`, PAGE_W - MARGIN, PAGE_H - MARGIN - 1.5, { align: 'right' })
+    doc.text(`Page ${i} of ${pages}`, PAGE_W - MARGIN, PAGE_H - MARGIN - 5.5, { align: 'right' })
+    // The accuracy disclaimer on every page (#143).
+    ;(doc.splitTextToSize(pdfText(DISCLAIMER), PAGE_W - 2 * MARGIN) as string[]).forEach((line, n) =>
+      doc.text(line, MARGIN, PAGE_H - MARGIN - 1.5 + n * 3.5),
+    )
   }
 
   return doc.output('blob')

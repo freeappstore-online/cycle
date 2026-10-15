@@ -1,6 +1,8 @@
 import { Suspense, lazy, useEffect, useState } from 'react'
 import { BuildInfo, type NavItem, Shell } from '@freeappstore/sdk/ui'
 import { AppBadge } from './components/AppBadge'
+import { Onboarding, useFirstRun } from './components/Onboarding'
+import { cycleRepo } from './data'
 import { useToday } from './dates'
 import { fas } from './fas'
 import { CalendarScreen } from './screens/CalendarScreen'
@@ -24,6 +26,8 @@ const NAV: NavItem[] = [
 export default function App() {
   const [path, setPath] = useState(() => window.location.pathname)
   const today = useToday()
+  // The first-run introduction (#143): once per device, re-openable from Settings → About.
+  const [intro, setIntro] = useFirstRun(cycleRepo)
 
   // Optional encrypted sync: idle unless the user turned it on in Settings.
   useEffect(() => syncEngine.start(), [])
@@ -45,15 +49,26 @@ export default function App() {
   return (
     <Shell app={fas} appName="Cycle" nav={NAV} onNavigate={navigate}>
       <div className="mx-auto w-full max-w-3xl p-4 sm:p-8">
-        <Screen path={path} today={today} onNavigate={navigate} />
+        <Screen path={path} today={today} onNavigate={navigate} onShowIntro={() => setIntro(true)} />
       </div>
       <BuildInfo />
       <AppBadge today={today} />
+      <Onboarding open={intro} onClose={() => setIntro(false)} today={today} />
     </Shell>
   )
 }
 
-function Screen({ path, today, onNavigate }: { path: string; today: string; onNavigate: (href: string) => void }) {
+function Screen({
+  path,
+  today,
+  onNavigate,
+  onShowIntro,
+}: {
+  path: string
+  today: string
+  onNavigate: (href: string) => void
+  onShowIntro: () => void
+}) {
   switch (path) {
     case '/calendar':
       return <CalendarScreen today={today} />
@@ -64,7 +79,7 @@ function Screen({ path, today, onNavigate }: { path: string; today: string; onNa
         </Suspense>
       )
     case '/settings':
-      return <SettingsScreen today={today} />
+      return <SettingsScreen today={today} onShowIntro={onShowIntro} />
     default:
       return <TodayScreen today={today} />
   }

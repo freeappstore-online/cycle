@@ -2,6 +2,7 @@ import { PageHeader } from '@freeappstore/sdk/ui'
 import { useState } from 'react'
 import { DaySheet } from '../components/DaySheet'
 import { Drop } from '../components/Drop'
+import { EstimateDisclaimer } from '../components/EstimateDisclaimer'
 import { accentButton, primaryButton, secondaryButton } from '../components/buttons'
 import { useCycleData, useCycleRepo } from '../data'
 import type { DayLog, ISODate, Period, Settings } from '../data/types'
@@ -180,9 +181,7 @@ function Estimate({ periods, settings, today }: { periods: Period[]; settings: S
         </p>
       )}
       <p className="mb-0 mt-2 text-sm text-[var(--muted)]">{basis}</p>
-      <p className="mb-0 mt-3 text-xs text-[var(--muted)]">
-        An estimate from your logged periods, not medical advice. Don't rely on it for contraception.
-      </p>
+      <EstimateDisclaimer confidence={p.confidence} className="mt-3" />
     </section>
   )
 }

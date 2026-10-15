@@ -33,5 +33,8 @@ freeappstore-online/platform#135.
 - The document never scrolls (screencheck); the Shell's `<main>` does (see end of `index.css`).
 - Predictions (`predict.ts`) are estimates: label them so, and never frame anything as
   contraception or "safe days".
+- Privacy copy (Settings → Privacy, onboarding) must match real behaviour, including the
+  platform analytics loader in `index.html`; re-check it when that changes. The disclaimer text
+  lives in `privacy/copy.ts` (`<EstimateDisclaimer>` wherever predictions show, and the PDF).
 
 Platform conventions: https://raw.githubusercontent.com/freeappstore-online/freeappstore/main/SKILLS.md

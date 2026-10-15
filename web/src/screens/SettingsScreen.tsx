@@ -5,7 +5,9 @@ import { dangerButton, primaryButton, secondaryButton } from '../components/butt
 import { Busy, ErrorText, PassphraseField, input, useAction } from '../components/form'
 import { localToday } from '../dates'
 import { fas } from '../fas'
+import { AboutSection } from './settings/AboutSection'
 import { BackupSection } from './settings/BackupSection'
+import { PrivacySection } from './settings/PrivacySection'
 import { ReportSection } from './settings/ReportSection'
 import { SyncEngine, type SyncStatus, syncEngine, useSyncStatus } from '../sync'
 
@@ -28,17 +30,20 @@ export function SettingsScreen({
   engine = syncEngine,
   auth = fas.auth,
   today = localToday(),
+  onShowIntro,
 }: {
   engine?: SyncEngine
   auth?: SettingsAuth
   today?: string
+  /** Re-opens the first-run introduction. */
+  onShowIntro?: () => void
 }) {
   const [user, setUser] = useState(auth.user)
   useEffect(() => auth.onChange(setUser), [auth])
 
   return (
     <>
-      <PageHeader title="Settings" description="Sync, backup and about." />
+      <PageHeader title="Settings" description="Sync, backup, privacy and about." />
       <div className="flex flex-col gap-4">
         <section aria-labelledby="sync-heading" className={card}>
           <h2 id="sync-heading" className="m-0 text-base font-bold">
@@ -54,14 +59,8 @@ export function SettingsScreen({
 
         <BackupSection engine={engine} today={today} />
         <ReportSection today={today} />
-
-        <p className="m-0 text-sm text-[var(--muted)]">
-          Cycle is a free, MIT-licensed app on{' '}
-          <a href="https://freeappstore.online" className="underline">
-            FreeAppStore
-          </a>
-          .
-        </p>
+        <PrivacySection engine={engine} signedIn={user !== null} />
+        <AboutSection onShowIntro={onShowIntro} />
       </div>
     </>
   )

@@ -3,13 +3,14 @@ import type { CSSProperties } from 'react'
 import { useState } from 'react'
 import { DaySheet } from '../components/DaySheet'
 import { Drop } from '../components/Drop'
+import { EstimateDisclaimer } from '../components/EstimateDisclaimer'
 import { secondaryButton } from '../components/buttons'
 import { type DayCell, buildMonth, monthOf, monthsBetween, shiftMonth } from '../calendar'
 import { useCycleData } from '../data'
 import type { ISODate } from '../data/types'
 import { formatLong, formatMonth, weekdayNames } from '../dates'
 import { FLOW_LABELS } from '../labels'
-import { projectedPeriods } from '../predict'
+import { predict, projectedPeriods } from '../predict'
 
 /** Diagonal stripes: the fertile-window pattern, so it isn't told apart by colour alone. */
 const FERTILE_PATTERN: CSSProperties = {
@@ -29,7 +30,13 @@ export function CalendarScreen({ today }: { today: ISODate }) {
       ])
       // Reach a little past the end of the viewed month so estimates near its end show.
       const ahead = Math.max(1, monthsBetween(monthOf(today), month) + 2)
-      return { periods, settings, days, projected: projectedPeriods(periods, settings, today, ahead) }
+      return {
+        periods,
+        settings,
+        days,
+        projected: projectedPeriods(periods, settings, today, ahead),
+        confidence: predict(periods, settings, today).confidence,
+      }
     },
     [month, today],
   )
@@ -38,7 +45,6 @@ export function CalendarScreen({ today }: { today: ISODate }) {
   const model = data
     ? buildMonth({ month, weekStart, today, lutealLength: data.settings.lutealLength, ...data })
     : undefined
-  const hasEstimates = model?.days.some((d) => d.predicted || d.fertile)
 
   return (
     <>
@@ -90,11 +96,8 @@ export function CalendarScreen({ today }: { today: ISODate }) {
       )}
 
       <Legend />
-      {hasEstimates && (
-        <p className="mb-0 mt-2 text-xs text-[var(--muted)]">
-          Estimated days come from your logged periods. They're not medical advice; don't rely on them for contraception.
-        </p>
-      )}
+      {/* Estimates exist as soon as one period is logged (see the legend). */}
+      {data && data.periods.length > 0 && <EstimateDisclaimer confidence={data.confidence} className="mt-2" />}
 
       <DaySheet date={editing} today={today} onClose={() => setEditing(undefined)} />
     </>

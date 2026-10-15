@@ -63,6 +63,7 @@ describe('InsightsScreen', () => {
     expect(within(cramps).getAllByRole('cell')[0]).toHaveTextContent('20%')
     expect(within(cramps).getAllByRole('cell')[0]).toHaveAttribute('title', 'Cramps, days 1–5: 3 of 15 cycle days (20%)')
     expect(within(heatmap).getByRole('rowheader', { name: 'Bloating' })).toBeInTheDocument()
+    expect(screen.getByText('Do not use this app for contraception.')).toBeInTheDocument()
   })
 
   it('says so when no symptoms were logged', async () => {

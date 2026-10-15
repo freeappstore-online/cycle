@@ -90,6 +90,7 @@ describe('PDF', () => {
       'Saw GP about headaches',
       'Self-reported data from the Cycle app, not a medical record',
       'Page 1 of 1',
+      'Estimates only, not medical advice. Do not use this app for contraception.',
     ]) {
       expect(pdf).toContain(`(${s}`)
     }
@@ -102,6 +103,8 @@ describe('PDF', () => {
     const pages = Number(/Page 1 of (\d+)/.exec(pdf)?.[1])
     expect(pages).toBeGreaterThan(3)
     expect(pdf).toContain(`(Page ${pages} of ${pages})`)
+    // The contraception disclaimer is in the footer of every page.
+    expect(pdf.match(/Do not use this app for contraception/g)).toHaveLength(pages)
 
     const noNotes = await text(await renderSummaryPdf({ ...summary, notes: [] }, { compress: false }))
     expect(noNotes).not.toContain('Slept badly')

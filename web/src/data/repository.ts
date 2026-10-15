@@ -34,6 +34,8 @@ export interface CycleRepository {
    * Imported periods aren't checked for overlap; sync (#141) resolves those.
    */
   importAll(data: unknown, options: { mode: ImportMode }): Promise<void>
+  /** Deletes every day, period and setting on this device. */
+  clearAll(): Promise<void>
   /** Called after any write, from this tab or another. Returns an unsubscribe function. */
   subscribe(listener: () => void): () => void
   close(): Promise<void>
@@ -192,6 +194,13 @@ export function createCycleRepository({
             : Promise.resolve(),
         ])
       }
+      await tx.done
+      await afterWrite()
+    },
+
+    async clearAll() {
+      const tx = (await db()).transaction(DATA_STORES, 'readwrite')
+      await Promise.all(DATA_STORES.map((s) => tx.objectStore(s).clear()))
       await tx.done
       await afterWrite()
     },
