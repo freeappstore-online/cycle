@@ -152,7 +152,8 @@ describe('SettingsScreen', () => {
     }
     expect(within(privacy).getByText(/IndexedDB/)).toBeInTheDocument()
     expect(within(privacy).getByText(/without cookies and without your account/)).toBeInTheDocument()
-    expect(within(privacy).getByText(/Cloudflare Web Analytics/)).toBeInTheDocument()
+    expect(within(privacy).getByText(/Cloudflare Web Analytics \(beacon\.min\.js from\s+static\.cloudflareinsights\.com\)/)).toBeInTheDocument()
+    expect(within(privacy).queryByText(/no third-party trackers/)).not.toBeInTheDocument()
   })
 
   it('deletes all local and cloud data after confirmation', async () => {

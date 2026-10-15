@@ -69,16 +69,20 @@ export function PrivacySection({ engine, signedIn }: { engine: SyncEngine; signe
             and without your account, and held in this browser while you're offline. Nothing you log is ever included.
           </p>
           <p className="m-0">
-            FreeAppStore may also use Cloudflare Web Analytics, which doesn't use cookies and reports only aggregate
-            visit counts. As with any website, the servers handling these requests see your IP address and browser
-            type.
+            This app is served via FreeAppStore, which also loads Cloudflare Web Analytics (beacon.min.js from
+            static.cloudflareinsights.com). It doesn't use cookies and reports only aggregate page-view statistics,
+            such as page load times and visit counts; it never sees what you log. As with any website, the servers
+            handling these requests see your IP address and browser type.
           </p>
         </Topic>
         <Topic title="Backups and PDFs">
           <p className="m-0">Made on this device. They go only where you save or share them.</p>
         </Topic>
         <Topic title="What Cycle doesn't do">
-          <p className="m-0">No ads, no tracking cookies, no third-party trackers or SDKs, and nothing you log is sold or shared.</p>
+          <p className="m-0">
+            No ads, no tracking cookies, no advertising or tracking SDKs, and nothing you log is sold or shared. The only
+            third-party script is the Cloudflare Web Analytics beacon described above.
+          </p>
         </Topic>
 
         <div className="border-t border-[var(--line)] pt-4">

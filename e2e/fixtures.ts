@@ -1,17 +1,23 @@
 // Shared e2e setup. Every test gets:
 //   - a privacy guard: fails if any request (page or service worker) goes to a
-//     host other than the app itself or the *.freeappstore.online platform;
+//     host other than the app itself, the *.freeappstore.online platform, or
+//     the Cloudflare Web Analytics beacon that FreeAppStore's edge injects on
+//     the live host (disclosed in Settings → Privacy);
 //   - a fixed "today" (2026-10-15) so fixture dates and estimates are stable.
 
 import { type Page, test as base, expect } from '@playwright/test'
 
 export const TODAY = '2026-10-15'
 
+/** Third-party hosts the platform adds on *.freeappstore.online. Nothing else is allowed. */
+const PLATFORM_THIRD_PARTY = new Set(['static.cloudflareinsights.com'])
+
 export function isAllowedRequest(url: string, appOrigin: string): boolean {
   const u = new URL(url)
   if (u.protocol === 'data:' || u.protocol === 'blob:') return true
   if (u.origin === appOrigin) return true
-  return u.protocol === 'https:' && (u.hostname === 'freeappstore.online' || u.hostname.endsWith('.freeappstore.online'))
+  if (u.protocol !== 'https:') return false
+  return u.hostname === 'freeappstore.online' || u.hostname.endsWith('.freeappstore.online') || PLATFORM_THIRD_PARTY.has(u.hostname)
 }
 
 export const test = base.extend<{ privacyGuard: void; fixedToday: void }>({
@@ -22,7 +28,7 @@ export const test = base.extend<{ privacyGuard: void; fixedToday: void }>({
         if (!isAllowedRequest(r.url(), new URL(baseURL!).origin)) offenders.push(r.url())
       })
       await use()
-      expect(offenders, 'requests to hosts other than the app and *.freeappstore.online').toEqual([])
+      expect(offenders, 'requests to hosts other than the app, *.freeappstore.online and the Cloudflare beacon').toEqual([])
     },
     { auto: true },
   ],

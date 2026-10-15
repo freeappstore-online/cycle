@@ -1,19 +1,26 @@
 # Cycle
 
-**Coming soon — private period tracker.** A free app on [FreeAppStore](https://freeappstore.online),
-live at https://cycle.freeappstore.online.
+**Private period & cycle tracker: your data stays on your device.** A free, MIT-licensed app on
+[FreeAppStore](https://freeappstore.online), live at https://cycle.freeappstore.online.
 
-Right now this is a shell: the four planned screens (Today, Calendar, Insights, Settings) exist
-but don't store anything yet. Progress is tracked in
-[freeappstore-online/platform#135](https://github.com/freeappstore-online/platform/issues/135).
+- Log periods, flow, symptoms, mood and notes; see them on a calendar.
+- Estimated next period and fertile window from your own history (estimates only, not
+  medical advice, and not for contraception).
+- Insights: cycle-length history and a symptom heatmap.
+- Optional end-to-end encrypted sync between devices, JSON backup/restore and a PDF summary
+  for a doctor.
+- Works offline as an installable PWA. No account needed.
+
+Privacy details are in the app under Settings → Privacy.
 
 ## Develop
 
 ```bash
 pnpm install
-pnpm dev      # local dev server
-pnpm build    # production build in web/dist
-fas check     # FreeAppStore compliance checks
+pnpm dev                 # local dev server
+pnpm test                # unit tests (Vitest)
+pnpm build && pnpm e2e   # Playwright end-to-end tests against the production build
+fas check                # FreeAppStore compliance checks
 ```
 
 Pushes to `main` auto-deploy via GitHub Actions.

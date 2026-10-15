@@ -41,7 +41,8 @@ describe('Onboarding', () => {
     const { user, unmount } = await setup()
     expect(await screen.findByRole('dialog', { name: 'Welcome to Cycle' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Your cycle data stays on this device' })).toBeInTheDocument()
-    expect(screen.getByText(/without cookies/)).toBeInTheDocument()
+    expect(screen.getByText(/without cookies/)).toHaveTextContent(/static.cloudflareinsights.com/)
+    expect(screen.queryByText(/no third-party trackers/)).not.toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Skip introduction' }))
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()

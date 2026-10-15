@@ -10,7 +10,8 @@ freeappstore-online/platform#135.
 - Build: `pnpm build`
 - Test: `pnpm test` (Vitest + fake-indexeddb)
 - E2E: `pnpm build && pnpm e2e` (Playwright, `e2e/`; desktop + mobile, light + dark). Every test
-  fails on a request to any host but the app and `*.freeappstore.online`. Runs in CI on `main`.
+  fails on a request to any host but the app, `*.freeappstore.online` and the Cloudflare beacon
+  host. Runs in CI on `main`.
 - Check: `fas check`, then `pnpm build && fas screencheck --skip-build` (its own build step
   can't spawn pnpm on Windows). The SDK Shell's skip link is flagged on every viewport;
   that's a platform issue, not the app's.
@@ -18,8 +19,10 @@ freeappstore-online/platform#135.
 
 ## Notes
 
-- Fonts are self-hosted (`@fontsource-variable/*`); the app makes no third-party requests
-  beyond the platform API and analytics loader. Keep it that way.
+- Fonts are self-hosted (`@fontsource-variable/*`). The app code makes no third-party requests
+  beyond the platform API and analytics loader. On the live host, Cloudflare's edge also injects
+  the Web Analytics beacon (`static.cloudflareinsights.com`); the privacy copy discloses it and
+  the e2e guard allows exactly that host. Don't add any other.
 - Data layer: `web/src/data` (IndexedDB via `idb`, local-only). The `periods` store is the
   source of truth for period ranges; `DayLog.flow` is per-day detail. Schema changes need a
   `MIGRATIONS` step in `migrations.ts` and a fixture test.

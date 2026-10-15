@@ -1,6 +1,6 @@
 {
   "name": "cycle",
-  "description": "A private period tracker. Your data stays on your device unless you turn on encrypted sync.",
+  "description": "Private period & cycle tracker: your data stays on your device",
   "private": true,
   "packageManager": "pnpm@10.30.3",
   "engines": {

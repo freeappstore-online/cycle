@@ -103,7 +103,7 @@ function Steps({ today, onDone }: { today: ISODate; onDone: () => void }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="m-0 text-xs font-bold text-[var(--muted)]">
+      <p className="m-0 text-xs font-bold text-[var(--ink)]">
         Step {step} of {STEPS}
       </p>
       <h3 ref={heading} tabIndex={-1} className="m-0 text-lg font-bold outline-none">
@@ -117,8 +117,9 @@ function Steps({ today, onDone }: { today: ISODate; onDone: () => void }) {
             offline.
           </p>
           <p className="m-0">
-            No ads, no tracking cookies and no third-party trackers. FreeAppStore counts page views (which screen, not
-            what you log) without cookies. Settings → Privacy explains exactly what is stored where.
+            No ads and no tracking cookies. FreeAppStore counts page views (which screen, not what you log), and
+            Cloudflare Web Analytics loads a script from static.cloudflareinsights.com that counts visits in aggregate,
+            without cookies. Neither sees what you log. Settings → Privacy explains exactly what is stored where.
           </p>
         </div>
       )}

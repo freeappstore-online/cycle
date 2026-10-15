@@ -1,4 +1,5 @@
-// Privacy (#144): every request goes only to the app or *.freeappstore.online.
+// Privacy (#144): every request goes only to the app, *.freeappstore.online, or
+// the disclosed Cloudflare Web Analytics beacon host.
 // The guard in fixtures.ts runs for every test; this one visits every screen
 // with data so all lazy chunks, fonts and the analytics loader are exercised.
 
@@ -10,7 +11,10 @@ test('the guard itself rejects other hosts', () => {
   expect(isAllowedRequest('https://api.freeappstore.online/v1/analytics.js?app=cycle', app)).toBe(true)
   expect(isAllowedRequest('https://freeappstore.online/', app)).toBe(true)
   expect(isAllowedRequest('https://fonts.googleapis.com/css', app)).toBe(false)
-  expect(isAllowedRequest('https://static.cloudflareinsights.com/beacon.min.js', app)).toBe(false)
+  expect(isAllowedRequest('https://static.cloudflareinsights.com/beacon.min.js', app)).toBe(true)
+  expect(isAllowedRequest('http://static.cloudflareinsights.com/beacon.min.js', app)).toBe(false)
+  expect(isAllowedRequest('https://cloudflareinsights.com/cdn-cgi/rum', app)).toBe(false)
+  expect(isAllowedRequest('https://www.googletagmanager.com/gtag/js', app)).toBe(false)
   expect(isAllowedRequest('https://evil-freeappstore.online/', app)).toBe(false)
   expect(isAllowedRequest('http://api.freeappstore.online/', app)).toBe(false)
 })
