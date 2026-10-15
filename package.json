@@ -1,0 +1,15 @@
+{
+  "name": "cycle",
+  "private": true,
+  "packageManager": "pnpm@10.30.3",
+  "engines": { "node": ">=22" },
+  "pnpm": { "onlyBuiltDependencies": ["esbuild"] },
+  "repository": { "type": "git", "url": "git+https://github.com/freeappstore-online/cycle.git" },
+  "scripts": {
+    "dev": "pnpm --filter @cycle/web dev",
+    "build": "pnpm --filter @cycle/web build",
+    "preview": "pnpm --filter @cycle/web preview",
+    "typecheck": "pnpm --filter @cycle/web exec tsc -b",
+    "test": "pnpm --filter @cycle/web exec tsc -b"
+  }
+}
