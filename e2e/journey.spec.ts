@@ -53,10 +53,11 @@ test('full journey', async ({ page }) => {
   await expect(page.getByText('Do not use this app for contraception.')).toBeVisible()
 
   await go(page, 'Calendar')
-  expect(await page.locator('[data-fertile]').count()).toBeGreaterThan(0)
+  // Auto-waiting assertions: the month's data loads asynchronously.
+  await expect(page.locator('[data-fertile]').first()).toBeVisible()
   await page.getByRole('button', { name: 'Next month' }).click()
   await expect(page.getByRole('heading', { name: 'November 2026' })).toBeVisible()
-  expect(await page.locator('[data-predicted]').count()).toBeGreaterThan(0)
+  await expect(page.locator('[data-predicted]').first()).toBeVisible()
 
   // Insights renders (Recharts loads lazily).
   await go(page, 'Insights')
