@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { BuildInfo, type NavItem, PageHeader, Shell } from '@freeappstore/sdk/ui'
+import { Suspense, lazy, useEffect, useState } from 'react'
+import { BuildInfo, type NavItem, Shell } from '@freeappstore/sdk/ui'
 import { AppBadge } from './components/AppBadge'
 import { useToday } from './dates'
 import { fas } from './fas'
@@ -7,6 +7,9 @@ import { CalendarScreen } from './screens/CalendarScreen'
 import { SettingsScreen } from './screens/SettingsScreen'
 import { TodayScreen } from './screens/TodayScreen'
 import { syncEngine } from './sync'
+
+// Insights pulls in Recharts; load it only on that route so it stays out of the main chunk.
+const InsightsScreen = lazy(() => import('./screens/InsightsScreen'))
 
 // The app's screens. Shell renders them as its navbar (<nav aria-label="Main">,
 // current screen highlighted, a menu on phones). `title` becomes the browser
@@ -42,7 +45,7 @@ export default function App() {
   return (
     <Shell app={fas} appName="Cycle" nav={NAV} onNavigate={navigate}>
       <div className="mx-auto w-full max-w-3xl p-4 sm:p-8">
-        <Screen path={path} today={today} />
+        <Screen path={path} today={today} onNavigate={navigate} />
       </div>
       <BuildInfo />
       <AppBadge today={today} />
@@ -50,16 +53,15 @@ export default function App() {
   )
 }
 
-function Screen({ path, today }: { path: string; today: string }) {
+function Screen({ path, today, onNavigate }: { path: string; today: string; onNavigate: (href: string) => void }) {
   switch (path) {
     case '/calendar':
       return <CalendarScreen today={today} />
     case '/insights':
       return (
-        <>
-          <PageHeader title="Insights" description="Cycle length, period length and symptom trends." />
-          <ComingSoon />
-        </>
+        <Suspense fallback={<p className="text-[var(--muted)]">Loading…</p>}>
+          <InsightsScreen onNavigate={onNavigate} />
+        </Suspense>
       )
     case '/settings':
       return <SettingsScreen today={today} />
@@ -68,11 +70,3 @@ function Screen({ path, today }: { path: string; today: string }) {
   }
 }
 
-// Placeholder body for screens that aren't built yet.
-function ComingSoon() {
-  return (
-    <p className="rounded-[var(--radius)] border border-[var(--line)] bg-[var(--panel)] p-4 text-[var(--muted)]">
-      Coming soon. This screen is still being built.
-    </p>
-  )
-}

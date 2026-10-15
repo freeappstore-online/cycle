@@ -1,8 +1,9 @@
 # cycle
 
 Cycle: a private period & cycle tracker on FreeAppStore. Today and Calendar log periods,
-flow, symptoms, mood and notes; Settings has optional encrypted sync, JSON backup/restore
-and a doctor PDF; Insights is still "Coming soon". See freeappstore-online/platform#135.
+flow, symptoms, mood and notes; Insights charts cycle length and symptoms; Settings has
+optional encrypted sync, JSON backup/restore and a doctor PDF. See
+freeappstore-online/platform#135.
 
 - Live: https://cycle.freeappstore.online
 - Dev: `pnpm install && pnpm dev`
@@ -26,6 +27,9 @@ and a doctor PDF; Insights is still "Coming soon". See freeappstore-online/platf
 - Backups (`web/src/backup`) reuse `exportAll`/`importAll` and the sync envelope. The doctor
   PDF (`web/src/report`) loads jsPDF via `import()` only; its html2canvas/canvg/dompurify are
   aliased to a stub in `vite.config.ts` to keep them out of the precache.
+- Insights (`screens/InsightsScreen.tsx`, data in `web/src/insights/shape.ts`) is lazy-loaded
+  so Recharts is its own chunk. Chart colours are accent-hue steps from theme tokens
+  (`--chart-*` in `index.css`); every chart has a text/table equivalent.
 - The document never scrolls (screencheck); the Shell's `<main>` does (see end of `index.css`).
 - Predictions (`predict.ts`) are estimates: label them so, and never frame anything as
   contraception or "safe days".

@@ -249,7 +249,20 @@ body {
   min-height: 0 !important;
 }
 main.fas-main {
+  /* Positioned so absolutely placed descendants (e.g. .sr-only text) stay inside the scroller. */
+  position: relative;
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
+}
+
+/* Insights chart steps of the accent hue (one hue, light → strong). Dark mode
+   mixes in more accent so the light step still stands off a black page. */
+:root {
+  --chart-rest: color-mix(in oklab, var(--accent) 35%, var(--paper));
+  --chart-heat-max: 60%;
+}
+:root[data-theme='dark'] {
+  --chart-rest: color-mix(in oklab, var(--accent) 55%, var(--paper));
+  --chart-heat-max: 70%;
 }
