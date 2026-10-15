@@ -8,6 +8,7 @@ import { dangerButton } from '../../components/buttons'
 import { ErrorText, useAction } from '../../components/form'
 import { useCycleRepo } from '../../data'
 import { deleteAllData } from '../../privacy/deleteAll'
+import type { ReminderService } from '../../reminders'
 import { type SyncEngine, useSyncStatus } from '../../sync'
 
 const card = 'rounded-[var(--radius)] border border-[var(--line)] bg-[var(--panel)] p-4'
@@ -21,7 +22,15 @@ function Topic({ title, children }: { title: string; children: ReactNode }) {
   )
 }
 
-export function PrivacySection({ engine, signedIn }: { engine: SyncEngine; signedIn: boolean }) {
+export function PrivacySection({
+  engine,
+  signedIn,
+  reminders,
+}: {
+  engine: SyncEngine
+  signedIn: boolean
+  reminders?: ReminderService
+}) {
   const repo = useCycleRepo()
   const status = useSyncStatus(engine)
   const [confirming, setConfirming] = useState(false)
@@ -56,10 +65,18 @@ export function PrivacySection({ engine, signedIn }: { engine: SyncEngine; signe
             not what's in it. Your passphrase never leaves your devices, so it can't be recovered if you forget it.
           </p>
         </Topic>
+        <Topic title="If you turn on reminders">
+          <p className="m-0">
+            Reminders are off unless you turn them on, and need sign-in. Your FreeAppStore account then stores this
+            device's push address and the reminder times (for example a date and time for "period due", or a daily
+            time for the pill), plus quiet hours. It doesn't get your logged data, but a "period due" or "fertile
+            window" time does hint at when they're expected. Notifications only say "Check your calendar."
+          </p>
+        </Topic>
         <Topic title="Signing in">
           <p className="m-0">
             Signing in uses a FreeAppStore account (through GitHub, Google, Apple or an email link) and is only needed
-            for sync.
+            for sync and reminders.
           </p>
         </Topic>
         <Topic title="Page-view counts">
@@ -88,8 +105,8 @@ export function PrivacySection({ engine, signedIn }: { engine: SyncEngine; signe
         <div className="border-t border-[var(--line)] pt-4">
           <h3 className="m-0 text-sm font-bold">Delete all data</h3>
           <p className="mb-0 mt-1 text-sm text-[var(--muted)]">
-            Removes everything Cycle has stored on this device and, if you're signed in, the encrypted copy in your
-            account. Make a backup first if you might want it back.
+            Removes everything Cycle has stored on this device and, if you're signed in, the encrypted copy and any
+            reminders in your account. Make a backup first if you might want it back.
           </p>
           {needsSignIn && (
             <p className="mb-0 mt-2 text-sm font-semibold">
@@ -129,7 +146,7 @@ export function PrivacySection({ engine, signedIn }: { engine: SyncEngine; signe
         onCancel={() => setConfirming(false)}
         onConfirm={() => {
           setConfirming(false)
-          void action.run(() => deleteAllData({ repo, engine, signedIn })).then((ok) => setDone(ok))
+          void action.run(() => deleteAllData({ repo, engine, signedIn, reminders })).then((ok) => setDone(ok))
         }}
       />
     </section>

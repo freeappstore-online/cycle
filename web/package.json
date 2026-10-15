@@ -12,7 +12,7 @@
   "dependencies": {
     "@fontsource-variable/fraunces": "^5.3.0",
     "@fontsource-variable/manrope": "^5.3.0",
-    "@freeappstore/sdk": "^0.14.35",
+    "@freeappstore/sdk": "^0.15.0",
     "idb": "^8.0.4",
     "jspdf": "^4.2.1",
     "react": "^19.3.1",
@@ -34,6 +34,9 @@
     "typescript": "~6.0.3",
     "vite": "^8.3.4",
     "vite-plugin-pwa": "^1.3.0",
-    "vitest": "^5.0.4"
+    "vitest": "^5.0.4",
+    "workbox-core": "^7.4.1",
+    "workbox-precaching": "^7.4.1",
+    "workbox-routing": "^7.4.1"
   }
 }

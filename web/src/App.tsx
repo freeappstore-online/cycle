@@ -9,6 +9,7 @@ import { CalendarScreen } from './screens/CalendarScreen'
 import { SettingsScreen } from './screens/SettingsScreen'
 import { TodayScreen } from './screens/TodayScreen'
 import { syncEngine } from './sync'
+import { reminderService } from './reminders'
 
 // Insights pulls in Recharts; load it only on that route so it stays out of the main chunk.
 const InsightsScreen = lazy(() => import('./screens/InsightsScreen'))
@@ -31,6 +32,8 @@ export default function App() {
 
   // Optional encrypted sync: idle unless the user turned it on in Settings.
   useEffect(() => syncEngine.start(), [])
+  // Optional reminders (#148): checks whether push is available, then keeps any reminders in step.
+  useEffect(() => reminderService.start(), [])
 
   // Keep the screen in step with the browser's back and forward buttons.
   useEffect(() => {

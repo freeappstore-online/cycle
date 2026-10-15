@@ -2,6 +2,7 @@
 // signed in, every cycle:* key in fas.kv (the encrypted sync copy).
 
 import type { CycleRepository } from '../data/repository'
+import type { ReminderService } from '../reminders/service'
 import type { SyncEngine } from '../sync/engine'
 import { clearOnboardingSeen } from './onboarding'
 
@@ -16,10 +17,13 @@ export async function deleteAllData({
   repo,
   engine,
   signedIn,
+  reminders,
 }: {
   repo: CycleRepository
   engine: SyncEngine
   signedIn: boolean
+  /** Its server-side reminder times are deleted too. */
+  reminders?: ReminderService
 }): Promise<void> {
   if (signedIn) {
     // Deletes all cycle:* keys and forgets the sync key and settings on this
@@ -30,6 +34,7 @@ export async function deleteAllData({
     // sync would propagate the wipe anyway). Make the user sign in first.
     throw new NeedsSignInError()
   }
+  await reminders?.clearAll()
   await repo.clearAll()
   clearOnboardingSeen()
 }

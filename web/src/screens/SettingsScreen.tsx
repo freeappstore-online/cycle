@@ -8,6 +8,8 @@ import { fas } from '../fas'
 import { AboutSection } from './settings/AboutSection'
 import { BackupSection } from './settings/BackupSection'
 import { PrivacySection } from './settings/PrivacySection'
+import { RemindersSection } from './settings/RemindersSection'
+import { type ReminderService, reminderService } from '../reminders'
 import { ReportSection } from './settings/ReportSection'
 import { SyncEngine, type SyncStatus, syncEngine, useSyncStatus } from '../sync'
 
@@ -31,12 +33,14 @@ export function SettingsScreen({
   auth = fas.auth,
   today = localToday(),
   onShowIntro,
+  reminders = reminderService,
 }: {
   engine?: SyncEngine
   auth?: SettingsAuth
   today?: string
   /** Re-opens the first-run introduction. */
   onShowIntro?: () => void
+  reminders?: ReminderService
 }) {
   const [user, setUser] = useState(auth.user)
   useEffect(() => auth.onChange(setUser), [auth])
@@ -57,9 +61,10 @@ export function SettingsScreen({
           {user ? <SignedIn engine={engine} auth={auth} login={user.login} /> : <SignedOut engine={engine} auth={auth} />}
         </section>
 
+        <RemindersSection service={reminders} />
         <BackupSection engine={engine} today={today} />
         <ReportSection today={today} />
-        <PrivacySection engine={engine} signedIn={user !== null} />
+        <PrivacySection engine={engine} signedIn={user !== null} reminders={reminders} />
         <AboutSection onShowIntro={onShowIntro} />
       </div>
     </>

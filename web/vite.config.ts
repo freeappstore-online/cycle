@@ -15,19 +15,17 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      workbox: {
+      // Our own service worker (src/sw.ts) so it can handle fas.push
+      // reminders (#148). It keeps what the generated one did: precache
+      // everything below, skipWaiting + clientsClaim so deploys apply at
+      // once, and the index.html navigation fallback (/api and /v1 denied)
+      // so the app opens offline from the home screen.
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
+      injectManifest: {
         globPatterns: ['**/*.{js,css,html,png,svg,ico,woff2,wasm,json}'],
         maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
-        // Force the new SW to activate immediately instead of waiting for
-        // all tabs to close. Combined with registerType: 'autoUpdate' this
-        // ensures users always get the latest deploy without a manual refresh.
-        skipWaiting: true,
-        clientsClaim: true,
-        // Serve index.html for all navigation requests (SPA fallback).
-        // Without this, opening from iPhone home screen shows blank —
-        // the SW intercepts the navigation but has no response for it.
-        navigateFallback: '/index.html',
-        navigateFallbackDenylist: [/^\/api/, /^\/v1/],
       },
       // Manifest is defined in web/public/manifest.json (single source of truth).
       // VitePWA reads it from there automatically when manifest is false.
