@@ -10,3 +10,4 @@ export {
   cycleRepo,
 } from './repository'
 export { useCycleData } from './useCycleData'
+export { CycleRepoContext, useCycleRepo } from './RepoContext'

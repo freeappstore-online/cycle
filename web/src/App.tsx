@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react'
 import { initApp } from '@freeappstore/sdk'
 import { BuildInfo, type NavItem, PageHeader, Shell } from '@freeappstore/sdk/ui'
+import { AppBadge } from './components/AppBadge'
+import { useToday } from './dates'
+import { CalendarScreen } from './screens/CalendarScreen'
+import { TodayScreen } from './screens/TodayScreen'
 
 const fas = initApp({ appId: 'cycle' })
 
@@ -16,6 +20,7 @@ const NAV: NavItem[] = [
 
 export default function App() {
   const [path, setPath] = useState(() => window.location.pathname)
+  const today = useToday()
 
   // Keep the screen in step with the browser's back and forward buttons.
   useEffect(() => {
@@ -34,22 +39,18 @@ export default function App() {
   return (
     <Shell app={fas} appName="Cycle" nav={NAV} onNavigate={navigate}>
       <div className="mx-auto w-full max-w-3xl p-4 sm:p-8">
-        <Screen path={path} />
+        <Screen path={path} today={today} />
       </div>
       <BuildInfo />
+      <AppBadge today={today} />
     </Shell>
   )
 }
 
-function Screen({ path }: { path: string }) {
+function Screen({ path, today }: { path: string; today: string }) {
   switch (path) {
     case '/calendar':
-      return (
-        <>
-          <PageHeader title="Calendar" description="Past periods and predicted dates." />
-          <ComingSoon />
-        </>
-      )
+      return <CalendarScreen today={today} />
     case '/insights':
       return (
         <>
@@ -72,22 +73,15 @@ function Screen({ path }: { path: string }) {
         </>
       )
     default:
-      return (
-        <>
-          <PageHeader title="Today" description="Log your period, flow and symptoms." />
-          <ComingSoon />
-        </>
-      )
+      return <TodayScreen today={today} />
   }
 }
 
-// Placeholder body until the screens are built. The app doesn't track
-// anything yet, so it says so plainly.
+// Placeholder body for screens that aren't built yet.
 function ComingSoon() {
   return (
     <p className="rounded-[var(--radius)] border border-[var(--line)] bg-[var(--panel)] p-4 text-[var(--muted)]">
-      Coming soon. Cycle is a private period tracker in development; this screen doesn't store
-      anything yet.
+      Coming soon. This screen is still being built.
     </p>
   )
 }

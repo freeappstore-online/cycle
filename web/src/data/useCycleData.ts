@@ -1,17 +1,16 @@
 import { type DependencyList, useEffect, useState } from 'react'
-import { type CycleRepository, cycleRepo } from './repository'
+import type { CycleRepository } from './repository'
+import { useCycleRepo } from './RepoContext'
 
 /**
- * Loads data from the repository and reloads it after every write, so screens
- * stay current. Returns undefined until the first load finishes.
+ * Loads data from the repository (from CycleRepoContext) and reloads it after
+ * every write, so screens stay current. Returns undefined until the first load
+ * finishes.
  *
  *   const days = useCycleData((repo) => repo.listDays(month), [month.from, month.to])
  */
-export function useCycleData<T>(
-  load: (repo: CycleRepository) => Promise<T>,
-  deps: DependencyList = [],
-  repo: CycleRepository = cycleRepo,
-): T | undefined {
+export function useCycleData<T>(load: (repo: CycleRepository) => Promise<T>, deps: DependencyList = []): T | undefined {
+  const repo = useCycleRepo()
   const [value, setValue] = useState<T>()
 
   useEffect(() => {

@@ -9,3 +9,6 @@ dist
 
 # VibeCode QA reports (regenerated on each scan)
 .vibe-check/
+
+# fas screencheck --screenshots output
+screencheck-out/

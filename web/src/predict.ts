@@ -237,6 +237,18 @@ const NO_PREDICTION: Prediction = {
 }
 
 /**
+ * The estimated fertile window before a predicted period. Ovulation ≈ start −
+ * luteal length and the window is ovulation − 5 … + 1, stretched across the
+ * whole plausible range of starts rather than one confident day.
+ */
+export function fertileWindowFor(period: PredictedPeriod, lutealLength: number): { start: ISODate; end: ISODate } {
+  return {
+    start: addDays(period.rangeStart, -lutealLength - 5),
+    end: addDays(period.rangeEnd, -lutealLength + 1),
+  }
+}
+
+/**
  * Estimates the next period, ovulation and fertile window from logged periods.
  * No prediction until at least one period is logged.
  */
@@ -246,17 +258,10 @@ export function predict(periods: readonly Period[], settings: PredictSettings, t
 
   const k = firstUpcoming(model, today)
   const next = periodAt(model, k)
-  const luteal = settings.lutealLength
-  const ovulation = addDays(next.start, -luteal)
   return {
     nextPeriod: next,
-    // Ovulation ≈ next start − luteal length; window = ovulation − 5 … + 1,
-    // stretched across the whole plausible range of next starts.
-    fertileWindow: {
-      start: addDays(next.rangeStart, -luteal - 5),
-      end: addDays(next.rangeEnd, -luteal + 1),
-    },
-    ovulationEstimate: ovulation,
+    fertileWindow: fertileWindowFor(next, settings.lutealLength),
+    ovulationEstimate: addDays(next.start, -settings.lutealLength),
     averageCycleLength: model.average,
     cycleLengthSD: model.sd,
     basedOnCycles: model.basedOn,

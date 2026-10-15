@@ -229,3 +229,27 @@ a:focus-visible {
 /* Shell's text-size preference scales rem-based app typography. */
 :root[data-text='lg'] { font-size: 112.5%; }
 :root[data-text='sm'] { font-size: 87.5%; }
+
+/* No document-level scroll (fas screencheck): the page is locked to the
+   viewport and the Shell's <main> scrolls instead. The Shell root sets an
+   inline min-height, hence !important. */
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+#root {
+  height: 100dvh;
+  min-height: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+#root > div:has(> main.fas-main) {
+  height: 100%;
+  min-height: 0 !important;
+}
+main.fas-main {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
