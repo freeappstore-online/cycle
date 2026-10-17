@@ -5,6 +5,7 @@ import {
   addMonths,
   daysBetween,
   deriveCycles,
+  fertileWindowFor,
   predict,
   type PredictSettings,
   projectedPeriods,
@@ -247,5 +248,49 @@ describe('projectedPeriods', () => {
       '2026-04-23',
       '2026-05-21',
     ])
+  })
+})
+
+describe('prediction input validation', () => {
+  const periods = history('2026-01-01', [28, 30])
+
+  it.each(['2026-02-29', '2026-04-31', 'not-a-date', '2026-1-01'])('rejects invalid date %s', (date) => {
+    expect(() => predict(periods, SETTINGS, date)).toThrow()
+    expect(() => projectedPeriods(periods, SETTINGS, date, 3)).toThrow()
+    expect(() => deriveCycles([{ ...periods[0], start: date }])).toThrow()
+  })
+
+  it.each([0, -28, NaN, Infinity, 28.5, 91])('rejects invalid cycle length %s even without history', (length) => {
+    const settings = { ...SETTINGS, defaultCycleLength: length }
+    expect(() => predict([], settings, '2026-01-01')).toThrow()
+    expect(() => projectedPeriods(periods, settings, '2026-01-01', 3)).toThrow()
+  })
+
+  it.each([0, NaN, Infinity, 22, 12.5])('rejects invalid ovulation offset %s', (lutealLength) => {
+    expect(() => predict(periods, { lutealLength }, '2026-03-01')).toThrow()
+    const period = predict(periods, SETTINGS, '2026-03-01').nextPeriod!
+    expect(() => fertileWindowFor(period, lutealLength)).toThrow()
+  })
+
+  it.each([0, -1, NaN, Infinity, 16, 4.5])('rejects invalid period length %s', (defaultPeriodLength) => {
+    expect(() => predict(periods, { ...SETTINGS, defaultPeriodLength }, '2026-03-01')).toThrow()
+  })
+
+  it.each([-1, NaN, Infinity, 1.5])('rejects invalid projection horizon %s', (months) => {
+    expect(() => projectedPeriods(periods, SETTINGS, '2026-03-01', months)).toThrow()
+  })
+
+  it('rejects reversed periods and duplicate starts', () => {
+    expect(() => predict([{ ...periods[0], end: '2025-12-31' }], SETTINGS, '2026-03-01')).toThrow()
+    expect(() => predict([periods[0], { ...periods[0], id: 'duplicate' }], SETTINGS, '2026-03-01')).toThrow()
+  })
+
+  it('uses one shared fertile-window rule and preserves input order and values', () => {
+    const input = [...periods].reverse().map((period) => Object.freeze({ ...period }))
+    const before = JSON.stringify(input)
+    Object.freeze(input)
+    const result = predict(input, { lutealLength: 12 }, '2026-03-01')
+    expect(result.fertileWindow).toEqual(fertileWindowFor(result.nextPeriod!, 12))
+    expect(JSON.stringify(input)).toBe(before)
   })
 })

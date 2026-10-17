@@ -9,6 +9,7 @@
 // so local timezone and DST changes can't shift a date by one.
 
 import type { ISODate, Period, Settings } from './data/types'
+import { isISODate, validatePeriod, validateSettings } from './data/validate'
 
 /** Cycles outside this many days are kept in history but left out of averages. */
 export const MIN_CYCLE_LENGTH = 15
@@ -18,6 +19,9 @@ export const AVERAGE_WINDOW = 6
 /** Used when there's no history and onboarding didn't ask (#143). */
 export const FALLBACK_CYCLE_LENGTH = 28
 export const FALLBACK_PERIOD_LENGTH = 5
+/** Inclusive window around ovulation, widened by the predicted start range. */
+export const FERTILE_DAYS_BEFORE = 5
+export const FERTILE_DAYS_AFTER = 1
 /** A spread (longest − shortest cycle) above this many days counts as irregular. */
 export const IRREGULAR_SPREAD = 8
 
@@ -71,6 +75,7 @@ const MS_PER_DAY = 86_400_000
 
 /** Days since 1970-01-01 for a `YYYY-MM-DD` date. */
 export function toDayNumber(date: ISODate): number {
+  if (!isISODate(date)) throw new RangeError('Expected a valid YYYY-MM-DD date')
   const [y, m, d] = date.split('-').map(Number)
   return Date.UTC(y, m - 1, d) / MS_PER_DAY
 }
@@ -104,10 +109,12 @@ export function addMonths(date: ISODate, months: number): ISODate {
  * current cycle (after the latest period) isn't complete, so it's left out.
  */
 export function deriveCycles(periods: readonly Period[]): Cycle[] {
+  periods.forEach(validatePeriod)
   const sorted = [...periods].sort((a, b) => (a.start < b.start ? -1 : a.start > b.start ? 1 : 0))
   const cycles: Cycle[] = []
   for (let i = 0; i + 1 < sorted.length; i++) {
     const cur = sorted[i]
+    if (cur.start === sorted[i + 1].start) throw new RangeError('Period starts must be unique')
     const length = daysBetween(cur.start, sorted[i + 1].start)
     const cycle: Cycle = {
       start: cur.start,
@@ -242,17 +249,28 @@ const NO_PREDICTION: Prediction = {
  * whole plausible range of starts rather than one confident day.
  */
 export function fertileWindowFor(period: PredictedPeriod, lutealLength: number): { start: ISODate; end: ISODate } {
+  validateSettings({ lutealLength })
+  if (!isISODate(period.rangeStart) || !isISODate(period.rangeEnd) || period.rangeStart > period.rangeEnd) {
+    throw new RangeError('Expected an ordered predicted start range')
+  }
   return {
-    start: addDays(period.rangeStart, -lutealLength - 5),
-    end: addDays(period.rangeEnd, -lutealLength + 1),
+    start: addDays(period.rangeStart, -lutealLength - FERTILE_DAYS_BEFORE),
+    end: addDays(period.rangeEnd, -lutealLength + FERTILE_DAYS_AFTER),
   }
 }
 
 /**
  * Estimates the next period, ovulation and fertile window from logged periods.
  * No prediction until at least one period is logged.
+ * Uses up to AVERAGE_WINDOW recent intervals within MIN/MAX_CYCLE_LENGTH.
+ * With no usable interval, uses the onboarding average (or the 28-day default).
+ * Fewer than three usable completed cycles always means low confidence.
+ * Invalid dates, settings, reversed periods or duplicate starts throw; inputs
+ * are never mutated. These are calendar estimates, not contraceptive guidance.
  */
 export function predict(periods: readonly Period[], settings: PredictSettings, today: ISODate): Prediction {
+  validateSettings(settings)
+  toDayNumber(today)
   const model = buildModel(periods, settings)
   if (!model) return { ...NO_PREDICTION }
 
@@ -282,6 +300,9 @@ export function projectedPeriods(
   today: ISODate,
   months: number,
 ): PredictedPeriod[] {
+  validateSettings(settings)
+  toDayNumber(today)
+  if (!Number.isInteger(months) || months < 0) throw new RangeError('months must be a non-negative integer')
   const model = buildModel(periods, settings)
   if (!model) return []
   const horizon = addMonths(today, months)
