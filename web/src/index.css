@@ -210,8 +210,11 @@ button:active {
 }
 
 button:focus-visible,
-a:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--sky) 52%, white);
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--ink);
   outline-offset: 3px;
 }
 
@@ -265,4 +268,12 @@ main.fas-main {
 :root[data-theme='dark'] {
   --chart-rest: color-mix(in oklab, var(--accent) 55%, var(--paper));
   --chart-heat-max: 70%;
+}
+
+/* Native controls and long notes must fit narrow columns. */
+main.fas-main { min-width: 0; }
+input, select, textarea { min-width: 0; max-width: 100%; }
+dd { min-width: 0; overflow-wrap: anywhere; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
 }

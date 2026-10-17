@@ -12,7 +12,7 @@ export interface SheetProps {
   children: ReactNode
 }
 
-const FOCUSABLE = 'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select, a[href], [tabindex="0"]'
+const FOCUSABLE = 'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), a[href], [tabindex="0"]'
 
 export function Sheet({ open, onClose, title, children }: SheetProps) {
   const headingId = useId()
@@ -29,6 +29,7 @@ export function Sheet({ open, onClose, title, children }: SheetProps) {
     // Portalled children (e.g. a ConfirmDialog) bubble here too; only trap our own.
     if (e.key !== 'Tab' || !ref.current || !ref.current.contains(e.target as Node)) return
     const items = [...ref.current.querySelectorAll<HTMLElement>(FOCUSABLE)]
+      .filter((item) => item.getClientRects().length > 0)
     if (items.length === 0) return
     const first = items[0]
     const last = items[items.length - 1]
@@ -43,7 +44,7 @@ export function Sheet({ open, onClose, title, children }: SheetProps) {
 
   return (
     <Modal open={open} onClose={onClose} maxWidth={520}>
-      <div ref={ref} role="dialog" aria-modal="true" aria-labelledby={headingId} onKeyDown={trapTab}>
+      <div ref={ref} role="dialog" aria-modal="true" aria-labelledby={headingId} onKeyDown={trapTab} className="min-w-0 break-words">
         <div className="mb-4 flex items-start justify-between gap-3">
           <h2 id={headingId} tabIndex={-1} className="display-font m-0 text-xl font-semibold outline-none">
             {title}
@@ -52,7 +53,7 @@ export function Sheet({ open, onClose, title, children }: SheetProps) {
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="-m-1 rounded-full px-2 text-2xl leading-none text-[var(--muted)] hover:text-[var(--ink)]"
+            className="-m-1 inline-flex min-h-11 min-w-11 items-center justify-center rounded-full px-2 text-2xl leading-none text-[var(--muted)] hover:text-[var(--ink)]"
           >
             ×
           </button>

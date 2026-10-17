@@ -1,7 +1,8 @@
+import { ConfirmDialog } from './ConfirmDialog'
 // Log or edit one day: period started/ended, flow, symptoms, mood and a note.
 // Period actions save straight away; the rest saves with "Save".
 
-import { ConfirmDialog } from '@freeappstore/sdk/ui'
+
 import { useId, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useCycleData, useCycleRepo } from '../data'
@@ -190,7 +191,7 @@ function DayForm({ date, today, initial, periods, periodLength, onClose, confirm
             onChange={(e) => setNote(e.target.value)}
             rows={3}
             maxLength={2000}
-            className="w-full resize-y rounded-[var(--radius-sm)] border border-[var(--line-strong)] bg-[var(--panel-strong)] p-3 text-base text-[var(--ink)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sky)]"
+            className="w-full resize-y rounded-[var(--radius-sm)] border border-[var(--muted)] bg-[var(--panel-strong)] p-3 text-base text-[var(--ink)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sky)]"
           />
         </div>
 

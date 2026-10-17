@@ -17,6 +17,7 @@ export function ReportSection({ today }: { today: ISODate }) {
   const fromId = useId()
   const toId = useId()
   const notesId = useId()
+  const errorId = useId()
   const [from, setFrom] = useState(() => addMonths(today, -6))
   const [to, setTo] = useState(today)
   const [notes, setNotes] = useState(false)
@@ -39,18 +40,18 @@ export function ReportSection({ today }: { today: ISODate }) {
         A PDF with your periods, cycle lengths and symptoms for a date range. It's made on this device and isn't
         uploaded anywhere.
       </p>
-      <div className="mt-4 grid grid-cols-2 gap-3">
+      <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
           <label htmlFor={fromId} className="mb-1 block text-sm font-bold">
             From
           </label>
-          <input id={fromId} type="date" value={from} max={to || today} onChange={(e) => setFrom(e.target.value)} className={input} />
+          <input id={fromId} type="date" aria-invalid={invalid || undefined} aria-describedby={invalid ? errorId : undefined} value={from} max={to || today} onChange={(e) => setFrom(e.target.value)} className={input} />
         </div>
         <div>
           <label htmlFor={toId} className="mb-1 block text-sm font-bold">
             To
           </label>
-          <input id={toId} type="date" value={to} min={from} max={today} onChange={(e) => setTo(e.target.value)} className={input} />
+          <input id={toId} type="date" aria-invalid={invalid || undefined} aria-describedby={invalid ? errorId : undefined} value={to} min={from} max={today} onChange={(e) => setTo(e.target.value)} className={input} />
         </div>
       </div>
       <div className="mt-3 flex items-start gap-2">
@@ -59,7 +60,7 @@ export function ReportSection({ today }: { today: ISODate }) {
           Include my notes
         </label>
       </div>
-      {invalid && <ErrorText>Choose a start date on or before the end date.</ErrorText>}
+      {invalid && <div id={errorId}><ErrorText>Choose a start date on or before the end date.</ErrorText></div>}
       {action.error && <ErrorText>{action.error}</ErrorText>}
       <Busy busy={action.busy} label="Creating PDF…" />
       <div className="mt-1 flex flex-wrap gap-2">

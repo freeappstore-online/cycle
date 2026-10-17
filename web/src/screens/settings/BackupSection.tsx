@@ -1,7 +1,8 @@
+import { ConfirmDialog } from '../../components/ConfirmDialog'
 // Settings → Backup: download a JSON backup (encrypted with the sync
 // passphrase when sync is unlocked, plain otherwise) and restore one.
 
-import { ConfirmDialog } from '@freeappstore/sdk/ui'
+
 import { type ChangeEvent, useId, useState } from 'react'
 import {
   type BackupFile,

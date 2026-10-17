@@ -3,7 +3,7 @@
 import { type ReactNode, useId, useState } from 'react'
 
 export const input =
-  'w-full rounded-[var(--radius-sm)] border border-[var(--line-strong)] bg-[var(--panel-strong)] px-3 py-2 text-base text-[var(--ink)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sky)]'
+  'w-full rounded-[var(--radius-sm)] border border-[var(--muted)] bg-[var(--panel-strong)] px-3 py-2 text-base text-[var(--ink)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sky)]'
 
 /** Runs an async action with busy and error state. */
 export function useAction() {

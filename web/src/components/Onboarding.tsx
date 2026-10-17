@@ -64,6 +64,7 @@ function Steps({ today, onDone }: { today: ISODate; onDone: () => void }) {
   const savedLast = useRef('')
   const heading = useRef<HTMLHeadingElement>(null)
   const ids = { cycle: useId(), period: useId(), last: useId() }
+  const errorId = useId()
 
   // Move focus to each new step's heading so screen readers announce it.
   const first = useRef(true)
@@ -140,27 +141,27 @@ function Steps({ today, onDone }: { today: ISODate; onDone: () => void }) {
       {step === 2 && (
         <div className="flex flex-col gap-3 text-sm">
           <p className="m-0">These help the first estimates. All three fields are required to save setup. If you're unsure, skip the introduction and log later.</p>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <label htmlFor={ids.cycle} className="mb-1 block font-bold">
                 Typical cycle length (days)
               </label>
-              <input id={ids.cycle} required type="number" inputMode="numeric" min={15} max={90} step={1} value={cycle} onChange={(e) => setCycle(e.target.value)} className={input} />
+              <input id={ids.cycle} aria-invalid={error ? true : undefined} aria-describedby={error ? errorId : undefined} required type="number" inputMode="numeric" min={15} max={90} step={1} value={cycle} onChange={(e) => setCycle(e.target.value)} className={input} />
             </div>
             <div>
               <label htmlFor={ids.period} className="mb-1 block font-bold">
                 Typical period length (days)
               </label>
-              <input id={ids.period} required type="number" inputMode="numeric" min={1} max={15} step={1} value={period} onChange={(e) => setPeriod(e.target.value)} className={input} />
+              <input id={ids.period} aria-invalid={error ? true : undefined} aria-describedby={error ? errorId : undefined} required type="number" inputMode="numeric" min={1} max={15} step={1} value={period} onChange={(e) => setPeriod(e.target.value)} className={input} />
             </div>
           </div>
           <div>
             <label htmlFor={ids.last} className="mb-1 block font-bold">
               When did your last period start?
             </label>
-            <input id={ids.last} required type="date" max={today} value={last} onChange={(e) => setLast(e.target.value)} className={input} />
+            <input id={ids.last} aria-invalid={error ? true : undefined} aria-describedby={error ? errorId : undefined} required type="date" max={today} value={last} onChange={(e) => setLast(e.target.value)} className={input} />
           </div>
-          {error && <ErrorText>{error}</ErrorText>}
+          {error && <div id={errorId}><ErrorText>{error}</ErrorText></div>}
         </div>
       )}
 

@@ -22,7 +22,7 @@ function Chip({ type, name, label, checked, onChange }: ChipProps) {
           'peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--sky)] ' +
           (checked
             ? 'border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--ink)]'
-            : 'border-[var(--line-strong)] bg-[var(--panel-strong)] text-[var(--muted)] hover:text-[var(--ink)]')
+            : 'border-[var(--muted)] bg-[var(--panel-strong)] text-[var(--muted)] hover:text-[var(--ink)]')
         }
       >
         {checked && <span aria-hidden="true">✓</span>}

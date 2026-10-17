@@ -1,5 +1,6 @@
+import { ConfirmDialog } from '../components/ConfirmDialog'
 import type { AuthProvider } from '@freeappstore/sdk'
-import { ConfirmDialog, PageHeader } from '@freeappstore/sdk/ui'
+import { PageHeader } from '@freeappstore/sdk/ui'
 import { type FormEvent, useEffect, useId, useState } from 'react'
 import { dangerButton, primaryButton, secondaryButton } from '../components/buttons'
 import { Busy, ErrorText, PassphraseField, input, useAction } from '../components/form'

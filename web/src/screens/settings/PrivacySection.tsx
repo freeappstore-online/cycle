@@ -1,8 +1,9 @@
+import { ConfirmDialog } from '../../components/ConfirmDialog'
 // Settings → Privacy: what is stored where, what FreeAppStore can see, and
 // "Delete all data". Keep this in step with the real behaviour of the data
 // layer (#137), sync (#141) and the platform analytics loader in index.html.
 
-import { ConfirmDialog } from '@freeappstore/sdk/ui'
+
 import { type ReactNode, useState } from 'react'
 import { dangerButton } from '../../components/buttons'
 import { ErrorText, useAction } from '../../components/form'
