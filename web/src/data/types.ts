@@ -30,9 +30,11 @@ export const SYMPTOMS = [
   'discharge',
 ] as const
 export type SymptomId = (typeof SYMPTOMS)[number]
+export type Symptom = SymptomId
 
 export const MOODS = ['happy', 'calm', 'sad', 'anxious', 'irritable', 'sensitive', 'energetic', 'low_energy'] as const
 export type MoodId = (typeof MOODS)[number]
+export type Mood = MoodId
 
 export interface DayLog {
   date: ISODate

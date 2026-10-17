@@ -2,6 +2,7 @@
 // lazily on first use, so importing this module doesn't touch IndexedDB.
 
 import type { IDBPDatabase } from 'idb'
+import { createLocalRepository } from './localRepository'
 import { type CycleDB, DATA_STORES, DB_NAME, SETTINGS_KEY, openCycleDB } from './db'
 import { MIGRATIONS, type Migrations, SCHEMA_VERSION, asVersionedPayload, migratePayload } from './migrations'
 import type { CycleExport, DateRange, DayLog, ImportMode, ISODate, Period, Settings } from './types'
@@ -60,7 +61,7 @@ function newId(): string {
   return crypto.randomUUID()
 }
 
-export function createCycleRepository({
+function createIndexedRepository({
   dbName = DB_NAME,
   schemaVersion = SCHEMA_VERSION,
   migrations = MIGRATIONS,
@@ -216,6 +217,51 @@ export function createCycleRepository({
       const open = dbPromise
       dbPromise = undefined
       if (open) (await open).close()
+    },
+  }
+}
+
+/** Select once per connection; never fall back after a successful open. */
+export function createCycleRepository(options: RepositoryOptions = {}): CycleRepository {
+  let selected: Promise<CycleRepository> | undefined
+  const listeners = new Set<() => void>()
+  function backend() {
+    return selected ??= (async () => {
+      let repo: CycleRepository
+      if (typeof indexedDB === 'undefined') repo = createLocalRepository(options)
+      else {
+        const indexed = createIndexedRepository(options)
+        try { await indexed.getSettings(); repo = indexed }
+        catch (error) {
+          await indexed.close().catch(() => {})
+          // Preserve schema/migration errors instead of hiding existing records.
+          if (typeof error !== 'object' || error === null || !('name' in error) || !['SecurityError', 'UnknownError', 'InvalidStateError', 'NotSupportedError'].includes(String(error.name))) throw error
+          repo = createLocalRepository(options)
+        }
+      }
+      repo.subscribe(() => listeners.forEach((listener) => listener()))
+      return repo
+    })()
+  }
+  return {
+    getDay: async (date) => (await backend()).getDay(date),
+    putDay: async (day) => (await backend()).putDay(day),
+    deleteDay: async (date) => (await backend()).deleteDay(date),
+    listDays: async (range) => (await backend()).listDays(range),
+    listPeriods: async (range) => (await backend()).listPeriods(range),
+    upsertPeriod: async (period) => (await backend()).upsertPeriod(period),
+    deletePeriod: async (id) => (await backend()).deletePeriod(id),
+    getSettings: async () => (await backend()).getSettings(),
+    putSettings: async (settings) => (await backend()).putSettings(settings),
+    exportAll: async () => (await backend()).exportAll(),
+    importAll: async (data, mode) => (await backend()).importAll(data, mode),
+    clearAll: async () => (await backend()).clearAll(),
+    subscribe(listener) { listeners.add(listener); return () => listeners.delete(listener) },
+    async close() {
+      listeners.clear()
+      const open = selected
+      selected = undefined
+      if (open) await (await open).close()
     },
   }
 }
