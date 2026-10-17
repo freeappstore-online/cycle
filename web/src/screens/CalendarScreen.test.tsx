@@ -3,7 +3,7 @@ import 'fake-indexeddb/auto'
 import '@testing-library/jest-dom/vitest'
 import { cleanup, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { CycleRepoContext, type CycleRepository, createCycleRepository } from '../data'
 import { formatDayMonth, formatLong } from '../dates'
 import { CalendarScreen } from './CalendarScreen'
@@ -81,6 +81,45 @@ describe('CalendarScreen', () => {
       expect(days().getByRole('button', { name: `${formatLong('2026-10-12')}, period` })).toHaveAttribute('data-period'),
     )
     expect(days().getByRole('button', { name: `${formatLong(TODAY)}, today, period` })).toBeInTheDocument()
+  })
+
+  it('labels estimated ovulation and gives it a visible symbol and legend', async () => {
+    await setup((r) => r.upsertPeriod({ start: '2026-10-01', end: '2026-10-05' }))
+    const ovulation = await screen.findByRole('button', { name: /estimated ovulation/ })
+    expect(ovulation).toHaveAttribute('data-ovulation', 'true')
+    expect(ovulation).toHaveTextContent('◇')
+    expect(screen.getByText('Estimated ovulation')).toBeInTheDocument()
+    expect(screen.getByText('Recorded period')).toBeInTheDocument()
+  })
+
+  it('refreshes edits in a past month without leaving that month', async () => {
+    const { user } = await setup()
+    await screen.findByRole('list', { name: /Days in/ })
+    await user.click(screen.getByRole('button', { name: 'Previous month' }))
+    await user.click(await screen.findByRole('button', { name: formatLong('2026-09-12') }))
+    await user.click(await screen.findByRole('button', { name: 'Period started this day' }))
+    await user.click(screen.getByRole('button', { name: 'Close' }))
+    expect(await screen.findByRole('button', { name: `${formatLong('2026-09-12')}, period` })).toHaveAttribute('data-period')
+    expect(days().getAllByRole('button')).toHaveLength(30)
+  })
+
+  it('crosses a year boundary and returns to the current month', async () => {
+    const { user } = await setup(undefined, <CalendarScreen today="2026-12-31" />)
+    await screen.findByRole('list', { name: /Days in/ })
+    await user.click(screen.getByRole('button', { name: 'Next month' }))
+    expect(await screen.findByRole('button', { name: formatLong('2027-01-01') })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Jump to today' }))
+    expect(await screen.findByRole('button', { name: `${formatLong('2026-12-31')}, today` })).toHaveAttribute('aria-current', 'date')
+  })
+
+  it('recovers from a storage load failure with Retry', async () => {
+    await setup((r) => {
+      vi.spyOn(r, 'listPeriods').mockRejectedValueOnce(new Error('Storage unavailable'))
+      return Promise.resolve()
+    })
+    expect(await screen.findByRole('alert')).toHaveTextContent('Storage unavailable')
+    await userEvent.click(screen.getByRole('button', { name: 'Retry' }))
+    expect(await screen.findByRole('list', { name: /Days in/ })).toBeInTheDocument()
   })
 })
 

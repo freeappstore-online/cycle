@@ -20,6 +20,8 @@ const FERTILE_PATTERN: CSSProperties = {
 export function CalendarScreen({ today }: { today: ISODate }) {
   const [month, setMonth] = useState(() => monthOf(today))
   const [editing, setEditing] = useState<ISODate>()
+  const [loadError, setLoadError] = useState<string>()
+  const [attempt, setAttempt] = useState(0)
 
   const data = useCycleData(
     async (repo) => {
@@ -31,6 +33,7 @@ export function CalendarScreen({ today }: { today: ISODate }) {
       // Reach a little past the end of the viewed month so estimates near its end show.
       const ahead = Math.max(1, monthsBetween(monthOf(today), month) + 2)
       return {
+        month,
         periods,
         settings,
         days,
@@ -38,12 +41,13 @@ export function CalendarScreen({ today }: { today: ISODate }) {
         confidence: predict(periods, settings, today).confidence,
       }
     },
-    [month, today],
+    [month, today, attempt],
+    setLoadError,
   )
 
   const weekStart = data?.settings.weekStart ?? 1
-  const model = data
-    ? buildMonth({ month, weekStart, today, lutealLength: data.settings.lutealLength, ...data })
+  const model = data && data.month === month
+    ? buildMonth({ weekStart, today, lutealLength: data.settings.lutealLength, ...data })
     : undefined
 
   return (
@@ -80,7 +84,12 @@ export function CalendarScreen({ today }: { today: ISODate }) {
           <span key={d}>{d}</span>
         ))}
       </div>
-      {model ? (
+      {loadError ? (
+        <div>
+          <p role="alert">Could not load your calendar: {loadError}</p>
+          <button type="button" className={secondaryButton} onClick={() => { setLoadError(undefined); setAttempt((value) => value + 1) }}>Retry</button>
+        </div>
+      ) : model ? (
         <ol aria-label={`Days in ${formatMonth(month)}`} className="m-0 grid list-none grid-cols-7 gap-1 p-0">
           {Array.from({ length: model.leading }, (_, i) => (
             <li key={`blank-${i}`} aria-hidden="true" />
@@ -95,6 +104,9 @@ export function CalendarScreen({ today }: { today: ISODate }) {
         <p className="text-[var(--muted)]">Loading…</p>
       )}
 
+      {data && data.periods.length === 0 && (
+        <p className="text-sm text-[var(--muted)]">Select a day to log your first period. Estimates appear once a period is recorded.</p>
+      )}
       <Legend />
       {/* Estimates exist as soon as one period is logged (see the legend). */}
       {data && data.periods.length > 0 && <EstimateDisclaimer confidence={data.confidence} className="mt-2" />}
@@ -111,6 +123,7 @@ export function dayLabel(cell: DayCell): string {
   if (cell.log?.flow) parts.push(`${FLOW_LABELS[cell.log.flow].toLowerCase()} flow`)
   if (cell.predicted) parts.push('estimated period')
   if (cell.fertile) parts.push('estimated fertile window')
+  if (cell.ovulation) parts.push('estimated ovulation')
   if (cell.log?.symptoms.length) parts.push('symptoms logged')
   if (cell.log?.mood) parts.push('mood logged')
   if (cell.log?.note) parts.push('has a note')
@@ -132,6 +145,7 @@ function DayButton({ cell, onOpen }: { cell: DayCell; onOpen: () => void }) {
       data-period={cell.period || undefined}
       data-predicted={cell.predicted || undefined}
       data-fertile={cell.fertile || undefined}
+      data-ovulation={cell.ovulation || undefined}
       className={
         `relative flex aspect-square w-full min-h-10 flex-col items-center justify-center rounded-[var(--radius-sm)] text-sm ${look} ` +
         (cell.isToday ? 'font-extrabold underline decoration-2 underline-offset-4 ring-2 ring-[var(--ink)] ring-offset-1 ring-offset-[var(--paper)] ' : '') +
@@ -142,6 +156,7 @@ function DayButton({ cell, onOpen }: { cell: DayCell; onOpen: () => void }) {
       <span>{cell.day}</span>
       <span aria-hidden="true" className="flex h-3 items-center gap-0.5 text-[0.6rem] leading-none">
         {(cell.period || cell.predicted) && <Drop filled={cell.period} />}
+        {cell.ovulation && <span className="font-bold">◇</span>}
         {extras && <span className="text-[var(--ink)]">●</span>}
         {cell.log?.note && <span className="text-[var(--ink)]">✎</span>}
       </span>
@@ -161,7 +176,7 @@ function Legend() {
           <span aria-hidden="true" className={`${swatch} border-2 border-solid border-[var(--accent)] bg-[var(--accent-soft)]`}>
             <Drop filled />
           </span>
-          Period
+          Recorded period
         </li>
         <li className="flex items-center gap-2">
           <span aria-hidden="true" className={`${swatch} border-2 border-dashed border-[var(--accent)]`}>
@@ -172,6 +187,10 @@ function Legend() {
         <li className="flex items-center gap-2">
           <span aria-hidden="true" className={`${swatch} border border-dotted border-[var(--sky)]`} style={FERTILE_PATTERN} />
           Estimated fertile window
+        </li>
+        <li className="flex items-center gap-2">
+          <span aria-hidden="true" className={`${swatch} border border-dotted border-[var(--sky)] font-bold`} style={FERTILE_PATTERN}>◇</span>
+          Estimated ovulation
         </li>
         <li className="flex items-center gap-2">
           <span aria-hidden="true" className={`${swatch} font-extrabold underline ring-2 ring-[var(--ink)]`}>

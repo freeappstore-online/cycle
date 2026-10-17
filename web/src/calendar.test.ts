@@ -56,6 +56,7 @@ describe('buildMonth', () => {
     const fertile = month.days.filter((d) => d.fertile).map((d) => d.day)
     // Range Nov 7–11, so the window is (Nov 7 − 14 − 5) … (Nov 11 − 14 + 1).
     expect([fertile[0], fertile.at(-1)]).toEqual([19, 29])
+    expect(month.days.filter((d) => d.ovulation).map((d) => d.date)).toEqual(['2026-10-26'])
     // Nothing estimated in the past.
     expect(month.days.slice(0, 15).some((d) => d.predicted || d.fertile)).toBe(false)
 

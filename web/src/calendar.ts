@@ -29,6 +29,8 @@ export interface DayCell {
   predicted: boolean
   /** Inside an estimated fertile window (today or later). */
   fertile: boolean
+  /** Most likely ovulation day; always an estimate. */
+  ovulation: boolean
   log?: DayLog
 }
 
@@ -72,6 +74,7 @@ export function buildMonth({ month, weekStart, today, periods, days, projected, 
       period,
       predicted,
       fertile: upcoming && !predicted && fertile.some((w) => w.start <= date && date <= w.end),
+      ovulation: upcoming && !predicted && projected.some((p) => addDays(p.start, -lutealLength) === date),
       log: logs.get(date),
     })
   }
