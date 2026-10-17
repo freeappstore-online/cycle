@@ -43,6 +43,27 @@ describe('availability', () => {
 })
 
 describe('ReminderService', () => {
+  it('saves inactive choices across launches without push calls, even signed out', async () => {
+    const { service, repo, push, storage, auth } = await setup({ status: 503, user: null })
+    expect(await service.saveLocalPrefs({ ...DEFAULT_PREFS, periodDue: true, daysBefore: 5 })).toBe(true)
+    const again = new ReminderService({ push, repo, auth, storage, fetch: fetchStatus(503) })
+    expect(again.status().prefs).toMatchObject({ periodDue: true, daysBefore: 5 })
+    await again.refreshAvailability()
+    await again.resync()
+    expect(push.calls).toEqual([])
+  })
+
+  it('reports a local storage failure without claiming the preferences were saved', async () => {
+    const { repo, push, auth } = await setup({ status: 503 })
+    const service = new ReminderService({ push, repo, auth, storage: {
+      getItem: () => null, removeItem: () => {}, setItem: () => { throw new Error('Quota') },
+    } })
+    expect(await service.saveLocalPrefs({ ...DEFAULT_PREFS, pill: true })).toBe(false)
+    expect(service.status().prefs.pill).toBe(false)
+    expect(service.status().error).toMatch(/Couldn't save/)
+    expect(push.calls).toEqual([])
+  })
+
   it('while push is not configured (503): no permission prompt, no server calls, no error', async () => {
     const { push, service } = await setup({ status: 503 })
     expect(service.status().availability).toBe('not-configured')

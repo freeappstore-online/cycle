@@ -38,14 +38,13 @@ function Body({ service, status }: { service: ReminderService; status: ReturnTyp
     case 'checking':
       return <Note>Checking whether reminders are available…</Note>
     case 'not-configured':
-      return (
-        <Note>
-          Coming soon: reminders when your period is due, when your fertile window starts, and a daily pill reminder.
-          They'll arrive as plain notifications that don't say what they're about. Nothing to set up yet.
-        </Note>
-      )
     case 'unreachable':
-      return <Note>Reminders can't be set up right now (you may be offline). Everything else works as usual.</Note>
+      return <>
+        <Note>Coming soon: reminders when your period is due, when your fertile window starts, and a daily pill reminder.
+          Delivery is unavailable. Save preferences on this device; reminders are not active.
+          Return here to activate them when support is available.</Note>
+        <Form service={service} status={status} localOnly />
+      </>
   }
   if (!status.support.supported) {
     return (
@@ -67,7 +66,7 @@ function Body({ service, status }: { service: ReminderService; status: ReturnTyp
   return <Form service={service} status={status} />
 }
 
-function Form({ service, status }: { service: ReminderService; status: ReturnType<typeof useReminderStatus> }) {
+function Form({ service, status, localOnly = false }: { service: ReminderService; status: ReturnType<typeof useReminderStatus>; localOnly?: boolean }) {
   const [prefs, setPrefs] = useState<ReminderPrefs>(status.prefs)
   const [saved, setSaved] = useState(false)
   useEffect(() => setPrefs(status.prefs), [status.prefs])
@@ -83,11 +82,11 @@ function Form({ service, status }: { service: ReminderService; status: ReturnTyp
       className="mt-3 flex flex-col gap-3 text-sm"
       onSubmit={async (e) => {
         e.preventDefault()
-        setSaved(await service.savePrefs(prefs))
+        setSaved(await (localOnly ? service.saveLocalPrefs(prefs) : service.savePrefs(prefs)))
       }}
     >
       <p className="m-0 text-[var(--muted)]">
-        Notifications only say "Check your calendar." They never mention periods, fertility or pills.
+        {localOnly ? 'Future notifications will only say "Check your calendar." Saving preferences does not enable delivery or request permission.' : 'Notifications only say "Check your calendar." They never mention periods, fertility or pills.'}
       </p>
       <div className="flex flex-wrap items-center gap-2">
         <input id={ids.due} type="checkbox" className={box} checked={prefs.periodDue} onChange={(e) => set({ periodDue: e.target.checked })} />
@@ -167,17 +166,16 @@ function Form({ service, status }: { service: ReminderService; status: ReturnTyp
         )}
       </div>
       <p className="m-0 text-xs text-[var(--muted)]">
-        Reminder times are estimates and follow your logged periods. Your account stores only the times, not your
-        cycle data.
+        {localOnly ? 'Preferences stay on this device. Prediction dates are estimates.' : 'Reminder times are estimates and follow your logged periods. Your account stores only the times, not your cycle data.'}
       </p>
       {status.error && <ErrorText>{status.error}</ErrorText>}
       <Busy busy={status.busy} label="Updating reminders…" />
       {saved && !status.error && (
         <p role="status" className="m-0 font-semibold">
-          Reminders saved.
+          {localOnly ? 'Preferences saved on this device. Reminders are not active.' : 'Reminders saved.'}
         </p>
       )}
-      {status.upcoming.length > 0 && (
+      {!localOnly && status.upcoming.length > 0 && (
         <ul className="m-0 list-none p-0" aria-label="Upcoming reminders">
           {status.upcoming.map((r) => (
             <li key={r.reminderId}>
@@ -189,7 +187,7 @@ function Form({ service, status }: { service: ReminderService; status: ReturnTyp
       )}
       <div>
         <button type="submit" className={primaryButton} disabled={status.busy}>
-          Save reminders
+          {localOnly ? 'Save preferences' : 'Save reminders'}
         </button>
       </div>
     </form>

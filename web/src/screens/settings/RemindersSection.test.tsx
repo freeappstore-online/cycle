@@ -29,10 +29,15 @@ afterEach(async () => {
 })
 
 describe('RemindersSection', () => {
-  it('shows a calm "coming soon" while push is not configured (503): no controls, no error', async () => {
-    await setup({ status: 503 })
+  it('shows a calm "coming soon" while push is not configured (503): local controls, no delivery', async () => {
+    const { push, service, user } = await setup({ status: 503 })
     expect(await screen.findByText(/Coming soon: reminders when your period is due/)).toBeInTheDocument()
-    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument()
+    await user.click(screen.getByRole('checkbox', { name: 'When my period is due' }))
+    await user.selectOptions(screen.getByLabelText('How early'), '5')
+    await user.click(screen.getByRole('button', { name: 'Save preferences' }))
+    expect(await screen.findByText('Preferences saved on this device. Reminders are not active.')).toBeInTheDocument()
+    expect(service.status().prefs).toMatchObject({ periodDue: true, daysBefore: 5 })
+    expect(push.calls).toEqual([])
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 

@@ -37,7 +37,7 @@ freeappstore-online/platform#135.
   (`--chart-*` in `index.css`); every chart has a text/table equivalent.
 - Reminders (`web/src/reminders`, Settings → Reminders) use `fas.push`; the service worker is
   `web/src/sw.ts` (injectManifest) with generic push text. While `/v1/push/vapid-public-key`
-  answers 503 the section shows "coming soon" and never asks for notification permission.
+  answers 503 the section saves inactive preferences locally, shows "coming soon", and never asks for notification permission.
 - The document never scrolls (screencheck); the Shell's `<main>` does (see end of `index.css`).
 - Predictions (`predict.ts`) are estimates: label them so, and never frame anything as
   contraception or "safe days".

@@ -221,6 +221,23 @@ export class ReminderService {
     })
   }
 
+  /** Saves inactive preferences without permission prompts or push calls. */
+  async saveLocalPrefs(prefs: ReminderPrefs): Promise<boolean> {
+    return this.serial(async () => {
+      try {
+        const storage = this.storage
+        if (!storage) throw new Error('Storage unavailable')
+        const next = { ...this.stored, prefs: { ...prefs } }
+        storage.setItem(STORAGE_KEY, JSON.stringify(next))
+        this.stored = next
+        return true
+      } catch {
+        this.error = "Couldn't save reminder preferences on this device. Please try again."
+        return false
+      }
+    })
+  }
+
   /** Re-plans from the latest data (no permission prompt). Never throws. */
   async resync(): Promise<void> {
     await this.serial(async () => {
