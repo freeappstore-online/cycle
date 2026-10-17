@@ -17,12 +17,15 @@ export function TodayScreen({ today }: { today: ISODate }) {
   const repo = useCycleRepo()
   const [editing, setEditing] = useState<ISODate>()
   const [error, setError] = useState<string>()
+  const [loadError, setLoadError] = useState<string>()
+  const [attempt, setAttempt] = useState(0)
   const data = useCycleData(
     async (r) => {
       const [periods, settings, day] = await Promise.all([r.listPeriods(), r.getSettings(), r.getDay(today)])
       return { periods, settings, day }
     },
-    [today],
+    [today, attempt],
+    setLoadError,
   )
 
   const act = (fn: () => Promise<unknown>) => {
@@ -33,7 +36,12 @@ export function TodayScreen({ today }: { today: ISODate }) {
   return (
     <>
       <PageHeader title="Today" description={formatLong(today)} />
-      {!data ? (
+      {loadError ? (
+        <div>
+          <p role="alert">Could not load your logs: {loadError}</p>
+          <button type="button" className={secondaryButton} onClick={() => { setLoadError(undefined); setAttempt((value) => value + 1) }}>Retry</button>
+        </div>
+      ) : !data ? (
         <p className="text-[var(--muted)]">Loading…</p>
       ) : (
         <div className="flex flex-col gap-4">

@@ -2,7 +2,7 @@
 // Period actions save straight away; the rest saves with "Save".
 
 import { ConfirmDialog } from '@freeappstore/sdk/ui'
-import { useId, useState } from 'react'
+import { useId, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useCycleData, useCycleRepo } from '../data'
 import { type DayLog, FLOWS, type Flow, type ISODate, MOODS, type MoodId, type Period, SYMPTOMS, type SymptomId } from '../data/types'
@@ -44,12 +44,21 @@ interface BodyProps {
 }
 
 function DaySheetBody({ date, today, onClose, confirming, setConfirming }: BodyProps) {
+  const [loadError, setLoadError] = useState<string>()
+  const [attempt, setAttempt] = useState(0)
   const data = useCycleData(
     async (repo) => {
       const [day, periods, settings] = await Promise.all([repo.getDay(date), repo.listPeriods(), repo.getSettings()])
       return { day: day ?? null, periods, settings }
     },
-    [date],
+    [date, attempt],
+    setLoadError,
+  )
+  if (loadError) return (
+    <div>
+      <p role="alert">Could not load your log: {loadError}</p>
+      <button type="button" className={secondaryButton} onClick={() => { setLoadError(undefined); setAttempt((value) => value + 1) }}>Retry</button>
+    </div>
   )
   if (!data) return <p className="text-[var(--muted)]">Loading…</p>
   if (date > today) {
@@ -91,11 +100,14 @@ function DayForm({ date, today, initial, periods, periodLength, onClose, confirm
   const [note, setNote] = useState(initial?.note ?? '')
   const [error, setError] = useState<string>()
   const [busy, setBusy] = useState(false)
+  const saving = useRef(false)
 
   const actions = periodActionsFor(periods, date, today)
   const current = actions.current
 
   const run = async (fn: () => Promise<unknown>, close = false) => {
+    if (saving.current) return
+    saving.current = true
     setBusy(true)
     setError(undefined)
     try {
@@ -104,6 +116,7 @@ function DayForm({ date, today, initial, periods, periodLength, onClose, confirm
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err))
     } finally {
+      saving.current = false
       setBusy(false)
     }
   }

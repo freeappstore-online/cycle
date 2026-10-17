@@ -12,8 +12,9 @@ const TODAY = '2026-10-15'
 let n = 0
 let repo: CycleRepository
 
-function setup(date: string = TODAY) {
+function setup(date: string = TODAY, configure?: (repo: CycleRepository) => void) {
   repo = createCycleRepository({ dbName: `daysheet-${++n}`, requestPersist: () => Promise.resolve(true) })
+  configure?.(repo)
   const onClose = vi.fn()
   const user = userEvent.setup()
   const utils = render(
@@ -26,12 +27,50 @@ function setup(date: string = TODAY) {
 
 afterEach(async () => {
   cleanup()
+  vi.restoreAllMocks()
   await repo.close()
 })
 
 const group = (name: string) => within(screen.getByRole('group', { name }))
 
 describe('DaySheet', () => {
+  it('shows a failed storage read and lets the user retry', async () => {
+    const { user } = setup(TODAY, (r) => {
+      vi.spyOn(r, 'getDay').mockRejectedValueOnce(new Error('Storage unavailable'))
+    })
+    expect(await screen.findByRole('alert')).toHaveTextContent('Storage unavailable')
+    await user.click(screen.getByRole('button', { name: 'Retry' }))
+    expect(await screen.findByRole('group', { name: 'Flow' })).toBeInTheDocument()
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+
+  it('keeps unsaved input after a failed write and allows saving again', async () => {
+    const { user, onClose } = setup(TODAY, (r) => {
+      vi.spyOn(r, 'putDay').mockRejectedValueOnce(new Error('Storage full'))
+    })
+    await user.type(await screen.findByLabelText('Notes'), 'Keep this note')
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('Storage full')
+    expect(onClose).not.toHaveBeenCalled()
+    expect(screen.getByLabelText('Notes')).toHaveValue('Keep this note')
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(onClose).toHaveBeenCalled())
+    expect(await repo.getDay(TODAY)).toMatchObject({ note: 'Keep this note' })
+  })
+
+  it('cancels deletion without changing the saved entry', async () => {
+    repo = createCycleRepository({ dbName: `daysheet-${++n}` })
+    await repo.putDay({ date: TODAY, symptoms: [], note: 'Keep me' })
+    await repo.close()
+    n--
+    const { user, onClose } = setup()
+    await user.click(await screen.findByRole('button', { name: 'Delete day' }))
+    expect(await screen.findByText('Delete this day?')).toBeInTheDocument()
+    await user.click(screen.getAllByRole('button', { name: 'Cancel' }).at(-1)!)
+    expect(await repo.getDay(TODAY)).toMatchObject({ note: 'Keep me' })
+    expect(onClose).not.toHaveBeenCalled()
+  })
+
   it('is a dialog named by the full date, with labelled pickers', async () => {
     setup()
     const dialog = screen.getByRole('dialog', { name: formatLong(TODAY) })

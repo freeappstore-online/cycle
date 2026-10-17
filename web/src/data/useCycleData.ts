@@ -9,7 +9,7 @@ import { useCycleRepo } from './RepoContext'
  *
  *   const days = useCycleData((repo) => repo.listDays(month), [month.from, month.to])
  */
-export function useCycleData<T>(load: (repo: CycleRepository) => Promise<T>, deps: DependencyList = []): T | undefined {
+export function useCycleData<T>(load: (repo: CycleRepository) => Promise<T>, deps: DependencyList = [], onError?: (error: string | undefined) => void): T | undefined {
   const repo = useCycleRepo()
   const [value, setValue] = useState<T>()
 
@@ -20,9 +20,17 @@ export function useCycleData<T>(load: (repo: CycleRepository) => Promise<T>, dep
       const current = ++run
       load(repo).then(
         (v) => {
-          if (!cancelled && current === run) setValue(() => v)
+          if (!cancelled && current === run) {
+            onError?.(undefined)
+            setValue(() => v)
+          }
         },
-        (err: unknown) => console.error('Cycle data load failed', err),
+        (err: unknown) => {
+          if (!cancelled && current === run) {
+            if (onError) onError(err instanceof Error ? err.message : String(err))
+            else console.error('Cycle data load failed', err)
+          }
+        },
       )
     }
     reload()
