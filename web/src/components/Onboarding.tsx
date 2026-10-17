@@ -5,6 +5,7 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { useCycleRepo } from '../data'
 import type { CycleRepository } from '../data/repository'
 import type { ISODate } from '../data/types'
+import { isISODate } from '../data/validate'
 import { newPeriodFrom } from '../periods'
 import { markOnboardingSeen, onboardingSeen } from '../privacy/onboarding'
 import { primaryButton, secondaryButton } from './buttons'
@@ -53,10 +54,12 @@ export function Onboarding({ open, onClose, today }: { open: boolean; onClose: (
 function Steps({ today, onDone }: { today: ISODate; onDone: () => void }) {
   const repo = useCycleRepo()
   const [step, setStep] = useState(1)
-  const [cycle, setCycle] = useState('')
-  const [period, setPeriod] = useState('')
+  const [cycle, setCycle] = useState('28')
+  const [period, setPeriod] = useState('5')
   const [last, setLast] = useState('')
   const [error, setError] = useState<string>()
+  const [busy, setBusy] = useState(false)
+  const saving = useRef(false)
   /** The last-period date already logged, so going Back and Next again doesn't log it twice. */
   const savedLast = useRef('')
   const heading = useRef<HTMLHeadingElement>(null)
@@ -73,10 +76,12 @@ function Steps({ today, onDone }: { today: ISODate; onDone: () => void }) {
   }, [step])
 
   const saveSetup = async () => {
-    const c = cycle.trim() ? Number(cycle) : undefined
-    const p = period.trim() ? Number(period) : undefined
-    if (c !== undefined && !(Number.isInteger(c) && c >= 15 && c <= 90)) throw new Error('Cycle length should be a whole number from 15 to 90 days.')
-    if (p !== undefined && !(Number.isInteger(p) && p >= 1 && p <= 15)) throw new Error('Period length should be a whole number from 1 to 15 days.')
+    const c = Number(cycle)
+    const p = Number(period)
+    if (!(Number.isInteger(c) && c >= 15 && c <= 90)) throw new Error('Cycle length should be a whole number from 15 to 90 days.')
+    if (!(Number.isInteger(p) && p >= 1 && p <= 15)) throw new Error('Period length should be a whole number from 1 to 15 days.')
+    if (p >= c) throw new Error('Period length must be shorter than cycle length. Reduce the period length or increase the cycle length.')
+    if (!isISODate(last)) throw new Error('Enter a valid last-period start date, or skip the introduction if you are unsure.')
     if (last && last > today) throw new Error("The last period can't start in the future.")
     if (c !== undefined || p !== undefined) await repo.putSettings({ defaultCycleLength: c, defaultPeriodLength: p })
     if (last && last !== savedLast.current) {
@@ -86,13 +91,19 @@ function Steps({ today, onDone }: { today: ISODate; onDone: () => void }) {
   }
 
   const next = async () => {
+    if (saving.current) return
     setError(undefined)
     if (step === 2) {
+      saving.current = true
+      setBusy(true)
       try {
         await saveSetup()
       } catch (err) {
         setError(err instanceof Error ? err.message : String(err))
         return
+      } finally {
+        saving.current = false
+        setBusy(false)
       }
     }
     if (step === STEPS) onDone()
@@ -126,26 +137,26 @@ function Steps({ today, onDone }: { today: ISODate; onDone: () => void }) {
 
       {step === 2 && (
         <div className="flex flex-col gap-3 text-sm">
-          <p className="m-0">These help the first estimates. Leave anything blank if you're not sure; you can change it later.</p>
+          <p className="m-0">These help the first estimates. All three fields are required to save setup. If you're unsure, skip the introduction and log later.</p>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label htmlFor={ids.cycle} className="mb-1 block font-bold">
                 Typical cycle length (days)
               </label>
-              <input id={ids.cycle} type="number" inputMode="numeric" min={15} max={90} placeholder="28" value={cycle} onChange={(e) => setCycle(e.target.value)} className={input} />
+              <input id={ids.cycle} required type="number" inputMode="numeric" min={15} max={90} step={1} value={cycle} onChange={(e) => setCycle(e.target.value)} className={input} />
             </div>
             <div>
               <label htmlFor={ids.period} className="mb-1 block font-bold">
                 Typical period length (days)
               </label>
-              <input id={ids.period} type="number" inputMode="numeric" min={1} max={15} placeholder="5" value={period} onChange={(e) => setPeriod(e.target.value)} className={input} />
+              <input id={ids.period} required type="number" inputMode="numeric" min={1} max={15} step={1} value={period} onChange={(e) => setPeriod(e.target.value)} className={input} />
             </div>
           </div>
           <div>
             <label htmlFor={ids.last} className="mb-1 block font-bold">
               When did your last period start?
             </label>
-            <input id={ids.last} type="date" max={today} value={last} onChange={(e) => setLast(e.target.value)} className={input} />
+            <input id={ids.last} required type="date" max={today} value={last} onChange={(e) => setLast(e.target.value)} className={input} />
           </div>
           {error && <ErrorText>{error}</ErrorText>}
         </div>
@@ -176,16 +187,16 @@ function Steps({ today, onDone }: { today: ISODate; onDone: () => void }) {
       )}
 
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <button type="button" className={secondaryButton} onClick={onDone}>
+        <button type="button" className={secondaryButton} onClick={onDone} disabled={busy}>
           {step === STEPS ? 'Close' : 'Skip introduction'}
         </button>
         <div className="flex gap-2">
           {step > 1 && (
-            <button type="button" className={secondaryButton} onClick={() => setStep(step - 1)}>
+            <button type="button" className={secondaryButton} onClick={() => setStep(step - 1)} disabled={busy}>
               Back
             </button>
           )}
-          <button type="button" className={primaryButton} onClick={() => void next()}>
+          <button type="button" className={primaryButton} onClick={() => void next()} disabled={busy}>
             {step === STEPS ? 'Start using Cycle' : step === 2 && (cycle || period || last) ? 'Save and continue' : 'Next'}
           </button>
         </div>
