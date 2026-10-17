@@ -8,6 +8,7 @@ import { dangerButton } from '../../components/buttons'
 import { ErrorText, useAction } from '../../components/form'
 import { useCycleRepo } from '../../data'
 import { deleteAllData } from '../../privacy/deleteAll'
+import { LOCAL_PRIVACY, STORAGE_WARNING } from '../../privacy/copy'
 import type { ReminderService } from '../../reminders'
 import { type SyncEngine, useSyncStatus } from '../../sync'
 
@@ -45,6 +46,7 @@ export function PrivacySection({
       </h2>
       <div className="mt-3 flex flex-col gap-4">
         <Topic title="On this device">
+          <p className="m-0">{LOCAL_PRIVACY}</p>
           <p className="m-0">
             Everything you log (periods, flow, symptoms, mood and notes) and your settings are stored in this browser's
             storage (IndexedDB) on this device. Cycle works without an account and offline.
@@ -94,6 +96,7 @@ export function PrivacySection({
         </Topic>
         <Topic title="Backups and PDFs">
           <p className="m-0">Made on this device. They go only where you save or share them.</p>
+          <p className="m-0">{STORAGE_WARNING}</p>
         </Topic>
         <Topic title="What Cycle doesn't do">
           <p className="m-0">

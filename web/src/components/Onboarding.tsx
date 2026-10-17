@@ -9,7 +9,7 @@ import { isISODate } from '../data/validate'
 import { newPeriodFrom } from '../periods'
 import { markOnboardingSeen, onboardingSeen } from '../privacy/onboarding'
 import { primaryButton, secondaryButton } from './buttons'
-import { DISCLAIMER } from '../privacy/copy'
+import { DISCLAIMER, LOCAL_PRIVACY, STORAGE_WARNING, PREDICTION_METHOD, FERTILE_EXPLANATION } from '../privacy/copy'
 import { ErrorText, input } from './form'
 import { Sheet } from './Sheet'
 
@@ -127,6 +127,8 @@ function Steps({ today, onDone }: { today: ISODate; onDone: () => void }) {
             Everything you log is saved in this browser on this device. You don't need an account, and Cycle works
             offline.
           </p>
+          <p className="m-0">{LOCAL_PRIVACY}</p>
+          <p className="m-0">{STORAGE_WARNING}</p>
           <p className="m-0">
             No ads and no tracking cookies. FreeAppStore counts page views (which screen, not what you log), and
             Cloudflare Web Analytics loads a script from static.cloudflareinsights.com that counts visits in aggregate,
@@ -179,9 +181,10 @@ function Steps({ today, onDone }: { today: ISODate; onDone: () => void }) {
       {step === 4 && (
         <div className="flex flex-col gap-2 text-sm">
           <p className="m-0">
-            Predicted periods and fertile windows are estimates from your own logged history. They get better as you
-            log more cycles, and they can be wrong, especially when cycles are irregular.
+            Period, ovulation and fertile-window dates are estimates, even with regular cycles and a long history.
           </p>
+          <p className="m-0">{PREDICTION_METHOD}</p>
+          <p className="m-0">{FERTILE_EXPLANATION}</p>
           <p className="m-0 font-semibold">{DISCLAIMER}</p>
         </div>
       )}

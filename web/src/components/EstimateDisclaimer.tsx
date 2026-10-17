@@ -13,6 +13,7 @@ export function EstimateDisclaimer({ confidence, className = '' }: { confidence?
           vary a lot, so the real dates may fall well outside the estimate.{' '}
         </>
       )}
+      Period, ovulation and fertile-window dates are estimates. Actual dates may fall outside the shown ranges, especially with limited or irregular history.{' '}
       Estimates only, not medical advice. <strong className="text-[var(--ink)]">Do not use this app for contraception.</strong>{' '}
       Talk to a clinician about irregular cycles or symptoms that concern you.
     </p>
