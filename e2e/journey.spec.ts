@@ -13,14 +13,16 @@ test('full journey', async ({ page }) => {
   await intro.getByRole('button', { name: 'Next' }).click()
   await intro.getByLabel('Typical cycle length (days)').fill('28')
   await intro.getByRole('button', { name: 'Save and continue' }).click()
+  await expect(intro.getByRole('alert')).toContainText('Enter a valid last-period start date')
+  await intro.getByLabel('When did your last period start?').fill(TODAY)
+  await intro.getByRole('button', { name: 'Save and continue' }).click()
   await expect(intro.getByRole('heading', { name: 'Optional: sync between devices' })).toBeVisible()
   await intro.getByRole('button', { name: 'Next' }).click()
   await expect(intro.getByText(/Do not use this app for contraception/)).toBeVisible()
   await intro.getByRole('button', { name: 'Start using Cycle' }).click()
   await expect(intro).toBeHidden()
 
-  // Log today's period, flow and symptoms.
-  await page.getByRole('button', { name: 'Period started today' }).click()
+  // The onboarding date started today's period; log its flow and symptoms.
   await expect(page.getByRole('heading', { name: 'Period day 1' })).toBeVisible()
   await page.getByRole('button', { name: 'Log today' }).click()
   const sheet = page.getByRole('dialog')
