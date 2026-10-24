@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto'
 import { PushNotConfiguredError, PushPermissionDeniedError } from '@freeappstore/sdk'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { type CycleRepository, createCycleRepository } from '../data/repository'
 import { DEFAULT_PREFS, atLocal } from './plan'
 import { FakePush, MemoryStorage, fetchStatus } from '../test/fakePush'
@@ -21,9 +21,10 @@ async function setup({ status = 200, user = { id: 'u' } as unknown, now = new Da
   const auth = { user, onChange: () => () => {} }
   const push = new FakePush(auth)
   const storage = new MemoryStorage()
-  const service = new ReminderService({ push, repo, auth, storage, fetch: fetchStatus(status), now: () => now, debounceMs: 0 })
+  let current = now
+  const service = new ReminderService({ push, repo, auth, storage, fetch: fetchStatus(status), now: () => current, debounceMs: 0 })
   await service.refreshAvailability()
-  return { repo, auth, push, storage, service }
+  return { repo, auth, push, storage, service, setNow: (date: Date) => { current = date } }
 }
 
 afterEach(async () => {
@@ -126,6 +127,25 @@ describe('ReminderService', () => {
     await new Promise((r) => setTimeout(r, 50))
     expect(push.server.get('period-due')!.nextAt).toEqual(atLocal('2026-11-11', '09:00'))
     stop()
+  })
+
+  it('plans the next cycle after a one-shot reminder day passes in an open tab', async () => {
+    const { push, service, setNow } = await setup({ now: new Date(2026, 10, 8, 8, 0) })
+    await service.savePrefs({ ...DEFAULT_PREFS, periodDue: true })
+    expect(push.server.get('period-due')?.nextAt).toEqual(atLocal('2026-11-08', '09:00'))
+
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    try {
+      const stop = service.start()
+      await service.resync()
+      setNow(new Date(2026, 10, 9, 0, 0))
+      await vi.advanceTimersByTimeAsync(16 * 60 * 60 * 1000)
+      await service.resync()
+      expect(push.server.get('period-due')?.nextAt).toEqual(atLocal('2026-12-06', '09:00'))
+      stop()
+    } finally {
+      vi.useRealTimers()
+    }
   })
 
   it('explains a blocked permission and keeps the reminders off', async () => {

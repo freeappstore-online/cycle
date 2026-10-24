@@ -11,6 +11,12 @@ import type { Page } from '@playwright/test'
 import { expect, go, openApp, seedFixture, test } from './fixtures'
 
 async function expectNoSeriousViolations(page: Page, label: string) {
+  if (await page.getByRole('dialog').count()) {
+    // The SDK modal fades in; axe must inspect its settled colours.
+    await expect.poll(() => page.getByRole('dialog').evaluateAll((dialogs) =>
+      dialogs.every((el) => el.parentElement!.parentElement!.parentElement!.getAnimations({ subtree: true }).every((a) => a.playState !== 'running')),
+    )).toBe(true)
+  }
   const results = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
     .exclude('#root > div > header')

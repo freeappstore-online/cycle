@@ -92,6 +92,7 @@ export class ReminderService {
   private snapshot: ReminderStatus
   private readonly listeners = new Set<() => void>()
   private timer?: ReturnType<typeof setTimeout>
+  private rolloverTimer?: ReturnType<typeof setTimeout>
   private chain: Promise<unknown> = Promise.resolve()
 
   constructor(options: ReminderServiceOptions) {
@@ -165,6 +166,7 @@ export class ReminderService {
   /** Checks availability and keeps reminders in step with logged data and sign-in. */
   start(): () => void {
     void this.refreshAvailability().then(() => this.resync())
+    this.scheduleRollover()
     const offRepo = this.o.repo.subscribe(() => this.scheduleResync())
     const offAuth = this.o.auth.onChange(() => {
       this.notify()
@@ -174,7 +176,19 @@ export class ReminderService {
       offRepo()
       offAuth()
       clearTimeout(this.timer)
+      clearTimeout(this.rolloverTimer)
     }
+  }
+
+  /** One-shot schedules need a new date after their reminder day has passed. */
+  private scheduleRollover() {
+    const now = this.o.now()
+    const nextDay = new Date(now)
+    nextDay.setHours(24, 0, 0, 0)
+    this.rolloverTimer = setTimeout(() => {
+      void this.resync()
+      this.scheduleRollover()
+    }, Math.max(1, nextDay.getTime() - now.getTime()))
   }
 
   async refreshAvailability(): Promise<Availability> {

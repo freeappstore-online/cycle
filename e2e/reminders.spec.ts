@@ -1,9 +1,8 @@
 // Reminders via fas.push (#148), against a mocked push service at the SDK's
-// real URLs (the platform's VAPID keys aren't configured yet, so production
-// answers 503). Covers the calm 503 state, the scheduling calls, rescheduling
+// real URLs. Covers the calm 503 state, the scheduling calls, rescheduling
 // after logging, and the generic notification text in the service worker.
 //
-// Manual real-device check (once VAPID is set): sign in on a phone (iOS: from
+// Manual real-device check: sign in on a phone (iOS: from
 // the Home Screen app), turn on a pill reminder 2 minutes ahead, lock the
 // phone, and confirm the notification says only "Reminder / Check your
 // calendar." and opens Cycle on Today when tapped.
@@ -120,11 +119,16 @@ test('reminders create, cancel and follow logging (mocked push service)', async 
   const section = page.getByRole('region', { name: 'Reminders' })
 
   await section.getByRole('checkbox', { name: 'When my period is due' }).check()
+  await section.getByLabel('How early').selectOption('5')
+  await section.getByRole('checkbox', { name: 'When my estimated fertile window starts' }).check()
   await section.getByRole('checkbox', { name: 'Daily pill reminder' }).check()
   await section.getByRole('button', { name: 'Save reminders' }).click()
   await expect(section.getByText('Reminders saved.')).toBeVisible()
   expect(log).toContain('POST subscriptions')
   expect(schedules.get('period-due')?.rule.type).toBe('at')
+  expect(schedules.get('period-due')?.rule.at).toBe(await page.evaluate(() => new Date(2026, 10, 5, 9).getTime()))
+  // Two observed cycles widen the second estimate to start as early as 7 Nov.
+  expect(schedules.get('fertile-start')?.rule.at).toBe(await page.evaluate(() => new Date(2026, 9, 19, 9).getTime()))
   expect(schedules.get('pill')?.rule).toEqual({ type: 'daily', time: '09:00' })
   await expect(section.getByRole('list', { name: 'Upcoming reminders' })).toContainText('Pill')
 
@@ -139,6 +143,15 @@ test('reminders create, cancel and follow logging (mocked push service)', async 
   await go(page, 'Today')
   await page.getByRole('button', { name: 'Period started today' }).click()
   await expect.poll(() => schedules.get('period-due')?.rule.at, { timeout: 10_000 }).not.toBe(before)
+
+  await go(page, 'Settings')
+  await section.getByRole('checkbox', { name: 'When my period is due' }).uncheck()
+  await section.getByRole('checkbox', { name: 'When my estimated fertile window starts' }).uncheck()
+  await section.getByRole('button', { name: 'Save reminders' }).click()
+  await expect.poll(() => schedules.size).toBe(0)
+  expect(log).toContain('DELETE period-due')
+  expect(log).toContain('DELETE fertile-start')
+  expect(log).toContain('DELETE pill')
 })
 
 test('a push shows only generic text', async ({ page, context, browserName }) => {
