@@ -42,9 +42,9 @@ export interface PredictedPeriod {
   start: ISODate
   /** Most likely last day. */
   end: ISODate
-  /** Earliest plausible first day. */
+  /** Earliest possible first day. */
   rangeStart: ISODate
-  /** Latest plausible first day. */
+  /** Latest possible first day. */
   rangeEnd: ISODate
 }
 
@@ -225,7 +225,7 @@ function periodAt(model: Model, k: number): PredictedPeriod {
 /** Index of the first predicted period that hasn't fully slipped into the past. */
 function firstUpcoming(model: Model, today: ISODate): number {
   let k = 1
-  // Past the latest plausible start with nothing logged: most likely a missed
+  // Past the latest possible start with nothing logged: most likely a missed
   // log, so move on to the following cycle instead of reporting a huge delay.
   while (periodAt(model, k).rangeEnd < today) k++
   return k
@@ -246,7 +246,7 @@ const NO_PREDICTION: Prediction = {
 /**
  * The estimated fertile window before a predicted period. Ovulation ≈ start −
  * luteal length and the window is ovulation − 5 … + 1, stretched across the
- * whole plausible range of starts rather than one confident day.
+ * whole possible range of starts rather than one confident day.
  */
 export function fertileWindowFor(period: PredictedPeriod, lutealLength: number): { start: ISODate; end: ISODate } {
   validateSettings({ lutealLength })

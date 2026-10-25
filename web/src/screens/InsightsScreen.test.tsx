@@ -33,6 +33,16 @@ afterEach(async () => {
 })
 
 describe('InsightsScreen', () => {
+  it('shows a storage error and reloads insights when retried', async () => {
+    const { user } = await setup([28, 29], async (r) => {
+      vi.spyOn(r, 'listPeriods').mockRejectedValueOnce(new Error('Storage unavailable'))
+    })
+    expect(await screen.findByRole('alert')).toHaveTextContent('Could not load your insights: Storage unavailable')
+    await user.click(screen.getByRole('button', { name: 'Retry' }))
+    expect(await screen.findByRole('region', { name: 'Summary' })).toBeInTheDocument()
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+
   it('points back to logging with fewer than two complete cycles', async () => {
     const { onNavigate, user } = await setup([28])
     expect(await screen.findByRole('heading', { name: 'Not enough cycles yet' })).toBeInTheDocument()

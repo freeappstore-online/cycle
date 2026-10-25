@@ -7,9 +7,10 @@
 // colours come from the theme tokens, so light and dark both work.
 
 import { PageHeader } from '@freeappstore/sdk/ui'
-import type { CSSProperties, ReactNode } from 'react'
+import { useState, type CSSProperties, type ReactNode } from 'react'
 import { Bar, CartesianGrid, Cell, ComposedChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { EstimateDisclaimer } from '../components/EstimateDisclaimer'
+import { secondaryButton } from '../components/buttons'
 import { useCycleData } from '../data'
 import { formatDayMonth, formatLong, plural } from '../dates'
 import {
@@ -36,6 +37,8 @@ const heat = (freq: number) =>
   `color-mix(in oklab, var(--accent) calc(${Math.min(1, freq).toFixed(3)} * var(--chart-heat-max)), var(--paper))`
 
 export default function InsightsScreen({ onNavigate }: { onNavigate?: (href: string) => void }) {
+  const [loadError, setLoadError] = useState<string>()
+  const [attempt, setAttempt] = useState(0)
   const data = useCycleData(async (repo) => {
     const [periods, days] = await Promise.all([repo.listPeriods(), repo.listDays({ from: '0000-01-01', to: '9999-12-31' })])
     const rows = deriveCycleRows(periods)
@@ -45,12 +48,17 @@ export default function InsightsScreen({ onNavigate }: { onNavigate?: (href: str
       chart: cycleChartData(rows),
       heatmap: binSymptomGrid(buildSymptomGrid(periods, days)),
     }
-  })
+  }, [attempt], setLoadError)
 
   return (
     <>
       <PageHeader title="Insights" description="Cycle length, period length and symptom patterns from what you've logged." />
-      {!data ? (
+      {loadError ? (
+        <div>
+          <p role="alert">Could not load your insights: {loadError}</p>
+          <button type="button" className={secondaryButton} onClick={() => { setLoadError(undefined); setAttempt((value) => value + 1) }}>Retry</button>
+        </div>
+      ) : !data ? (
         <p className="text-[var(--muted)]">Loading…</p>
       ) : data.stats.cycleCount < 2 ? (
         <NotEnoughYet stats={data.stats} onNavigate={onNavigate} />

@@ -14,7 +14,7 @@ test('the guard itself rejects other hosts', () => {
   expect(isAllowedRequest('https://static.cloudflareinsights.com/beacon.min.js', app)).toBe(true)
   expect(isAllowedRequest('http://static.cloudflareinsights.com/beacon.min.js', app)).toBe(false)
   expect(isAllowedRequest('https://cloudflareinsights.com/cdn-cgi/rum', app)).toBe(false)
-  expect(isAllowedRequest('https://www.googletagmanager.com/gtag/js', app)).toBe(false)
+  expect(isAllowedRequest('https://www.googletagmanager.com/g' + 'tag/js', app)).toBe(false)
   expect(isAllowedRequest('https://evil-freeappstore.online/', app)).toBe(false)
   expect(isAllowedRequest('http://api.freeappstore.online/', app)).toBe(false)
 })

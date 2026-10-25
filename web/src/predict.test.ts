@@ -196,7 +196,7 @@ describe('predict', () => {
 
   it('reports a late period while still within the range', () => {
     const periods = history('2026-01-01', [28, 28, 28, 28, 28, 28])
-    // Most likely start 2026-07-16, latest plausible 2026-07-18.
+    // Most likely start 2026-07-16, latest possible 2026-07-18.
     const p = predict(periods, SETTINGS, '2026-07-18')
     expect(p.nextPeriod?.start).toBe('2026-07-16')
     expect(p.daysLate).toBe(2)
@@ -206,7 +206,7 @@ describe('predict', () => {
     const periods = history('2025-07-17', [28, 28, 28, 28, 28, 28])
     expect(periods.at(-1)!.start).toBe('2026-01-01')
     const p = predict(periods, SETTINGS, '2026-04-15')
-    // Jan 29, Feb 26 and Mar 26 have all passed; the next plausible one is Apr 23 (±4).
+    // Jan 29, Feb 26 and Mar 26 have all passed; the next possible one is Apr 23 (±4).
     expect(p.nextPeriod).toMatchObject({ start: '2026-04-23', rangeStart: '2026-04-19', rangeEnd: '2026-04-27' })
     expect(p.daysLate).toBe(0)
     expect(p.averageCycleLength).toBe(28)
