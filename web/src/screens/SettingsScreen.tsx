@@ -23,7 +23,7 @@ export interface SettingsAuth {
   signOut(): void
 }
 
-const card = 'rounded-[var(--radius)] border border-[var(--line)] bg-[var(--panel)] p-4'
+const card = 'rounded-fas border border-line bg-panel p-4'
 const MIN_PASSPHRASE = 8
 
 const REMEMBER_HELP =
@@ -54,7 +54,7 @@ export function SettingsScreen({
           <h2 id="sync-heading" className="m-0 text-base font-bold">
             Encrypted sync
           </h2>
-          <p className="mb-0 mt-2 text-sm text-[var(--muted)]">
+          <p className="mb-0 mt-2 text-sm text-muted">
             Optional. Cycle works fully on this device without an account. With sync on, your data is encrypted on
             this device with a passphrase only you know before it's uploaded; the server only ever stores the
             encrypted copy.
@@ -180,7 +180,7 @@ function RememberToggle({ checked, onChange, disabled }: { checked: boolean; onC
         <label htmlFor={id} className="text-sm font-bold">
           Remember on this device
         </label>
-        <p id={`${id}-help`} className="m-0 text-xs text-[var(--muted)]">
+        <p id={`${id}-help`} className="m-0 text-xs text-muted">
           {REMEMBER_HELP}
         </p>
       </div>
@@ -215,7 +215,7 @@ function TurnOn({ engine, onForgot }: { engine: SyncEngine; onForgot: () => void
     }
   }, [engine])
 
-  if (hasRemote === undefined) return <p className="m-0 text-sm text-[var(--muted)]">Checking for synced data…</p>
+  if (hasRemote === undefined) return <p className="m-0 text-sm text-muted">Checking for synced data…</p>
 
   const submit = (e: FormEvent) => {
     e.preventDefault()
@@ -304,7 +304,7 @@ function SyncOn({ engine, status }: { engine: SyncEngine; status: SyncStatus }) 
   const action = useAction()
   return (
     <div className="flex flex-col gap-3">
-      <p role="status" className={`m-0 text-sm ${status.phase === 'error' ? 'font-semibold text-[var(--danger)]' : ''}`}>
+      <p role="status" className={`m-0 text-sm ${status.phase === 'error' ? 'font-semibold text-danger' : ''}`}>
         <span aria-hidden="true">🔒 </span>Sync is on. {syncLine(status)}
       </p>
       <div className="flex flex-wrap gap-2">
@@ -350,7 +350,7 @@ function ChangePassphrase({ engine, onDone }: { engine: SyncEngine; onDone: () =
         setProblem(p)
         if (!p && (await action.run(() => engine.changePassphrase(pass)))) onDone()
       }}
-      className="flex flex-col gap-3 rounded-[var(--radius-sm)] border border-[var(--line)] p-3"
+      className="flex flex-col gap-3 rounded-fas-sm border border-line p-3"
     >
       <p className="m-0 text-sm">Everything is re-encrypted with the new passphrase. Your other devices will ask for it.</p>
       <PassphraseField label="New passphrase" value={pass} onChange={setPass} autoComplete="new-password" hint={NEW_HINT} />

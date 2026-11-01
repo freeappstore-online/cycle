@@ -7,7 +7,7 @@ import { Busy, ErrorText, input } from '../../components/form'
 import { type ReminderService, reminderService, useReminderStatus } from '../../reminders'
 import { REMINDER_IDS, type ReminderPrefs } from '../../reminders/plan'
 
-const card = 'rounded-[var(--radius)] border border-[var(--line)] bg-[var(--panel)] p-4'
+const card = 'rounded-fas border border-line bg-panel p-4'
 
 const LABELS: Record<string, string> = {
   [REMINDER_IDS.periodDue]: 'Period due',
@@ -28,7 +28,7 @@ export function RemindersSection({ service = reminderService }: { service?: Remi
 }
 
 const Note = ({ children }: { children: React.ReactNode }) => (
-  <p role="status" className="mb-0 mt-2 text-sm text-[var(--muted)]">
+  <p role="status" className="mb-0 mt-2 text-sm text-muted">
     {children}
   </p>
 )
@@ -85,7 +85,7 @@ function Form({ service, status, localOnly = false }: { service: ReminderService
         setSaved(await (localOnly ? service.saveLocalPrefs(prefs) : service.savePrefs(prefs)))
       }}
     >
-      <p className="m-0 text-[var(--muted)]">
+      <p className="m-0 text-muted">
         {localOnly ? 'Future notifications will only say "Check your calendar." Saving preferences does not enable delivery or request permission.' : 'Notifications only say "Check your calendar." They never mention periods, fertility or pills.'}
       </p>
       <div className="flex flex-wrap items-center gap-2">
@@ -165,7 +165,7 @@ function Form({ service, status, localOnly = false }: { service: ReminderService
           </>
         )}
       </div>
-      <p className="m-0 text-xs text-[var(--muted)]">
+      <p className="m-0 text-xs text-muted">
         {localOnly ? 'Preferences stay on this device. Prediction dates are estimates.' : 'Reminder times are estimates and follow your logged periods. Your account stores only the times, not your cycle data.'}
       </p>
       {status.error && <ErrorText>{status.error}</ErrorText>}

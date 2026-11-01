@@ -19,10 +19,10 @@ function Chip({ type, name, label, checked, onChange }: ChipProps) {
       <span
         className={
           'inline-flex min-h-10 items-center gap-1 rounded-full border px-3 text-sm font-semibold ' +
-          'peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--sky)] ' +
+          'peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-sky ' +
           (checked
-            ? 'border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--ink)]'
-            : 'border-[var(--muted)] bg-[var(--panel-strong)] text-[var(--muted)] hover:text-[var(--ink)]')
+            ? 'border-accent bg-accent-soft text-ink'
+            : 'border-muted bg-panel-strong text-muted hover:text-ink')
         }
       >
         {checked && <span aria-hidden="true">✓</span>}
@@ -35,7 +35,7 @@ function Chip({ type, name, label, checked, onChange }: ChipProps) {
 function Group({ legend, children }: { legend: string; children: React.ReactNode }) {
   return (
     <fieldset className="m-0 min-w-0 border-0 p-0">
-      <legend className="mb-2 p-0 text-sm font-bold text-[var(--ink)]">{legend}</legend>
+      <legend className="mb-2 p-0 text-sm font-bold text-ink">{legend}</legend>
       <div className="flex flex-wrap gap-2">{children}</div>
     </fieldset>
   )

@@ -23,7 +23,7 @@ import type { ImportMode, ISODate } from '../../data/types'
 import { formatLong } from '../../dates'
 import { type SyncEngine, useSyncStatus } from '../../sync'
 
-const card = 'rounded-[var(--radius)] border border-[var(--line)] bg-[var(--panel)] p-4'
+const card = 'rounded-fas border border-line bg-panel p-4'
 
 export function BackupSection({ engine, today }: { engine: SyncEngine; today: ISODate }) {
   return (
@@ -31,11 +31,11 @@ export function BackupSection({ engine, today }: { engine: SyncEngine; today: IS
       <h2 id="backup-heading" className="m-0 text-base font-bold">
         Backup
       </h2>
-      <p className="mb-0 mt-2 text-sm text-[var(--muted)]">
+      <p className="mb-0 mt-2 text-sm text-muted">
         A file with all your data, made on this device. Keep it somewhere safe; restore it here or on another device.
       </p>
       <ExportBackup engine={engine} today={today} />
-      <hr className="my-4 border-0 border-t border-[var(--line)]" />
+      <hr className="my-4 border-0 border-t border-line" />
       <ImportBackup />
     </section>
   )

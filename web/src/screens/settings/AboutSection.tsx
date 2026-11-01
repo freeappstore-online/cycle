@@ -2,7 +2,7 @@ import { secondaryButton } from '../../components/buttons'
 import { EstimateDisclaimer } from '../../components/EstimateDisclaimer'
 import { PREDICTION_METHOD, FERTILE_EXPLANATION } from '../../privacy/copy'
 
-const card = 'rounded-[var(--radius)] border border-[var(--line)] bg-[var(--panel)] p-4'
+const card = 'rounded-fas border border-line bg-panel p-4'
 
 export function AboutSection({ onShowIntro }: { onShowIntro?: () => void }) {
   return (

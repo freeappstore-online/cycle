@@ -11,7 +11,7 @@ import { FLOW_LABELS, MOOD_LABELS, SYMPTOM_LABELS } from '../labels'
 import { type Prediction, daysBetween, fertileWindowFor, predict, projectedPeriods } from '../predict'
 import { cycleDay, newPeriodFrom, periodActionsFor } from '../periods'
 
-const card = 'rounded-[var(--radius)] border border-[var(--line)] bg-[var(--panel)] p-4'
+const card = 'rounded-fas border border-line bg-panel p-4'
 
 export function TodayScreen({ today }: { today: ISODate }) {
   const repo = useCycleRepo()
@@ -42,7 +42,7 @@ export function TodayScreen({ today }: { today: ISODate }) {
           <button type="button" className={secondaryButton} onClick={() => { setLoadError(undefined); setAttempt((value) => value + 1) }}>Retry</button>
         </div>
       ) : !data ? (
-        <p className="text-[var(--muted)]">Loading…</p>
+        <p className="text-muted">Loading…</p>
       ) : (
         <div className="flex flex-col gap-4">
           <section aria-labelledby="today-status" className={card}>
@@ -53,7 +53,7 @@ export function TodayScreen({ today }: { today: ISODate }) {
               onEnd={(p) => act(() => repo.upsertPeriod({ ...p, end: today }))}
             />
             {error && (
-              <p role="alert" className="mb-0 mt-3 text-sm font-semibold text-[var(--danger)]">
+              <p role="alert" className="mb-0 mt-3 text-sm font-semibold text-danger">
                 {error}
               </p>
             )}
@@ -109,7 +109,7 @@ function Status({
         )}
       </h2>
       {periods.length === 0 && (
-        <p className="mb-0 mt-2 text-[var(--muted)]">
+        <p className="mb-0 mt-2 text-muted">
           Log the first day of your period to start. If it started earlier, pick that day on the Calendar.
         </p>
       )}
@@ -130,7 +130,7 @@ function Status({
 }
 
 function DaySummary({ day }: { day: DayLog | undefined }) {
-  if (!day) return <p className="mb-0 mt-2 text-[var(--muted)]">Nothing logged yet today.</p>
+  if (!day) return <p className="mb-0 mt-2 text-muted">Nothing logged yet today.</p>
   const rows: [string, string][] = []
   if (day.flow) rows.push(['Flow', FLOW_LABELS[day.flow]])
   if (day.symptoms.length) rows.push(['Symptoms', day.symptoms.map((s) => SYMPTOM_LABELS[s]).join(', ')])
@@ -141,7 +141,7 @@ function DaySummary({ day }: { day: DayLog | undefined }) {
       {rows.map(([k, v]) => (
         <div key={k} className="contents">
           <dt className="font-bold">{k}</dt>
-          <dd className="m-0 whitespace-pre-wrap break-words text-[var(--muted)]">{v}</dd>
+          <dd className="m-0 whitespace-pre-wrap break-words text-muted">{v}</dd>
         </div>
       ))}
     </dl>
@@ -175,7 +175,7 @@ function Estimate({ periods, settings, today }: { periods: Period[]; settings: S
     <section aria-labelledby="today-estimate" className={`${card} border-dashed`}>
       <h2 id="today-estimate" className="m-0 flex items-center gap-2 text-base font-bold">
         <Drop filled={false} className="h-4 w-4" />
-        Next period <span className="font-normal text-[var(--muted)]">(estimate)</span>
+        Next period <span className="font-normal text-muted">(estimate)</span>
       </h2>
       <p className="display-font mb-1 mt-2 text-2xl font-semibold">{headline}</p>
       <p className="m-0 text-sm">
@@ -188,7 +188,7 @@ function Estimate({ periods, settings, today }: { periods: Period[]; settings: S
           {fertile.start <= today ? ' (includes today)' : ''}.
         </p>
       )}
-      <p className="mb-0 mt-2 text-sm text-[var(--muted)]">{basis}</p>
+      <p className="mb-0 mt-2 text-sm text-muted">{basis}</p>
       <EstimateDisclaimer confidence={p.confidence} className="mt-3" />
     </section>
   )

@@ -1,5 +1,4 @@
 import { PageHeader } from '@freeappstore/sdk/ui'
-import type { CSSProperties } from 'react'
 import { useState } from 'react'
 import { DaySheet } from '../components/DaySheet'
 import { Drop } from '../components/Drop'
@@ -13,9 +12,7 @@ import { FLOW_LABELS } from '../labels'
 import { predict, projectedPeriods } from '../predict'
 
 /** Diagonal stripes: the fertile-window pattern, so it isn't told apart by colour alone. */
-const FERTILE_PATTERN: CSSProperties = {
-  backgroundImage: 'repeating-linear-gradient(135deg, var(--sky-soft) 0 4px, transparent 4px 8px)',
-}
+const fertilePattern = 'bg-[image:var(--fertile-pattern)]'
 
 export function CalendarScreen({ today }: { today: ISODate }) {
   const [month, setMonth] = useState(() => monthOf(today))
@@ -79,7 +76,7 @@ export function CalendarScreen({ today }: { today: ISODate }) {
         </button>
       </div>
 
-      <div aria-hidden="true" className="grid grid-cols-7 gap-1 pb-1 text-center text-xs font-bold text-[var(--muted)]">
+      <div aria-hidden="true" className="grid grid-cols-7 gap-1 pb-1 text-center text-xs font-bold text-muted">
         {weekdayNames(weekStart).map((d) => (
           <span key={d}>{d}</span>
         ))}
@@ -101,11 +98,11 @@ export function CalendarScreen({ today }: { today: ISODate }) {
           ))}
         </ol>
       ) : (
-        <p className="text-[var(--muted)]">Loading…</p>
+        <p className="text-muted">Loading…</p>
       )}
 
       {data && data.periods.length === 0 && (
-        <p className="text-sm text-[var(--muted)]">Select a day to log your first period. Estimates appear once a period is recorded.</p>
+        <p className="text-sm text-muted">Select a day to log your first period. Estimates appear once a period is recorded.</p>
       )}
       <Legend />
       {/* Estimates exist as soon as one period is logged (see the legend). */}
@@ -131,10 +128,10 @@ export function dayLabel(cell: DayCell): string {
 }
 
 function DayButton({ cell, onOpen }: { cell: DayCell; onOpen: () => void }) {
-  let look = 'border-[var(--line)] bg-[var(--panel-strong)]'
-  if (cell.period) look = 'border-2 border-solid border-[var(--accent)] bg-[var(--accent-soft)]'
-  else if (cell.predicted) look = 'border-2 border-dashed border-[var(--accent)] bg-[var(--panel-strong)]'
-  else if (cell.fertile) look = 'border border-dotted border-[var(--sky)]'
+  let look = 'border-line bg-panel-strong'
+  if (cell.period) look = 'border-2 border-solid border-accent bg-accent-soft'
+  else if (cell.predicted) look = 'border-2 border-dashed border-accent bg-panel-strong'
+  else if (cell.fertile) look = 'border border-dotted border-sky'
   const extras = cell.log && (cell.log.symptoms.length > 0 || cell.log.mood)
   return (
     <button
@@ -147,25 +144,24 @@ function DayButton({ cell, onOpen }: { cell: DayCell; onOpen: () => void }) {
       data-fertile={cell.fertile || undefined}
       data-ovulation={cell.ovulation || undefined}
       className={
-        `relative flex aspect-square w-full min-h-10 flex-col items-center justify-center rounded-[var(--radius-sm)] text-sm ${look} ` +
-        (cell.isToday ? 'font-extrabold underline decoration-2 underline-offset-4 ring-2 ring-[var(--ink)] ring-offset-1 ring-offset-[var(--paper)] ' : '') +
-        (cell.isFuture && !cell.predicted && !cell.fertile ? 'text-[var(--muted)]' : 'text-[var(--ink)]')
+        `relative flex aspect-square w-full min-h-10 flex-col items-center justify-center rounded-fas-sm text-sm ${look} ` +
+        (cell.isToday ? 'font-extrabold underline decoration-2 underline-offset-4 ring-2 ring-ink ring-offset-1 ring-offset-[var(--paper)] ' : '') +
+        (cell.isFuture && !cell.predicted && !cell.fertile ? 'text-muted' : 'text-ink') + (cell.fertile ? ` ${fertilePattern}` : '')
       }
-      style={cell.fertile ? FERTILE_PATTERN : undefined}
     >
       <span>{cell.day}</span>
       <span aria-hidden="true" className="flex h-3 items-center gap-0.5 text-[0.6rem] leading-none">
         {(cell.period || cell.predicted) && <Drop filled={cell.period} />}
         {cell.ovulation && <span className="font-bold">◇</span>}
-        {extras && <span className="text-[var(--ink)]">●</span>}
-        {cell.log?.note && <span className="text-[var(--ink)]">✎</span>}
+        {extras && <span className="text-ink">●</span>}
+        {cell.log?.note && <span className="text-ink">✎</span>}
       </span>
     </button>
   )
 }
 
 function Legend() {
-  const swatch = 'inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-[var(--radius-sm)] text-[0.6rem]'
+  const swatch = 'inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-fas-sm text-[0.6rem]'
   return (
     <section aria-labelledby="legend-heading" className="mt-4">
       <h3 id="legend-heading" className="sr-only">
@@ -173,39 +169,39 @@ function Legend() {
       </h3>
       <ul className="m-0 grid list-none grid-cols-2 gap-x-4 gap-y-2 p-0 text-sm sm:grid-cols-3">
         <li className="flex items-center gap-2">
-          <span aria-hidden="true" className={`${swatch} border-2 border-solid border-[var(--accent)] bg-[var(--accent-soft)]`}>
+          <span aria-hidden="true" className={`${swatch} border-2 border-solid border-accent bg-accent-soft`}>
             <Drop filled />
           </span>
           Recorded period
         </li>
         <li className="flex items-center gap-2">
-          <span aria-hidden="true" className={`${swatch} border-2 border-dashed border-[var(--accent)]`}>
+          <span aria-hidden="true" className={`${swatch} border-2 border-dashed border-accent`}>
             <Drop filled={false} />
           </span>
           Estimated period
         </li>
         <li className="flex items-center gap-2">
-          <span aria-hidden="true" className={`${swatch} border border-dotted border-[var(--sky)]`} style={FERTILE_PATTERN} />
+          <span aria-hidden="true" className={`${swatch} border border-dotted border-sky ${fertilePattern}`} />
           Estimated fertile window
         </li>
         <li className="flex items-center gap-2">
-          <span aria-hidden="true" className={`${swatch} border border-dotted border-[var(--sky)] font-bold`} style={FERTILE_PATTERN}>◇</span>
+          <span aria-hidden="true" className={`${swatch} border border-dotted border-sky font-bold ${fertilePattern}`}>◇</span>
           Estimated ovulation
         </li>
         <li className="flex items-center gap-2">
-          <span aria-hidden="true" className={`${swatch} font-extrabold underline ring-2 ring-[var(--ink)]`}>
+          <span aria-hidden="true" className={`${swatch} font-extrabold underline ring-2 ring-ink`}>
             1
           </span>
           Today
         </li>
         <li className="flex items-center gap-2">
-          <span aria-hidden="true" className={`${swatch} border border-[var(--line)]`}>
+          <span aria-hidden="true" className={`${swatch} border border-line`}>
             ●
           </span>
           Symptoms or mood
         </li>
         <li className="flex items-center gap-2">
-          <span aria-hidden="true" className={`${swatch} border border-[var(--line)]`}>
+          <span aria-hidden="true" className={`${swatch} border border-line`}>
             ✎
           </span>
           Note

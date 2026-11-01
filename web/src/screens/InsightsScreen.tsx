@@ -7,7 +7,7 @@
 // colours come from the theme tokens, so light and dark both work.
 
 import { PageHeader } from '@freeappstore/sdk/ui'
-import { useState, type CSSProperties, type ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Bar, CartesianGrid, Cell, ComposedChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { EstimateDisclaimer } from '../components/EstimateDisclaimer'
 import { secondaryButton } from '../components/buttons'
@@ -25,7 +25,7 @@ import {
   deriveCycleRows,
 } from '../insights/shape'
 
-const card = 'rounded-[var(--radius)] border border-[var(--line)] bg-[var(--panel)] p-4'
+const card = 'rounded-fas border border-line bg-panel p-4'
 
 // Theme-derived colours: one hue (accent) at different strengths.
 const PERIOD_FILL = 'var(--accent)'
@@ -59,7 +59,7 @@ export default function InsightsScreen({ onNavigate }: { onNavigate?: (href: str
           <button type="button" className={secondaryButton} onClick={() => { setLoadError(undefined); setAttempt((value) => value + 1) }}>Retry</button>
         </div>
       ) : !data ? (
-        <p className="text-[var(--muted)]">Loading…</p>
+        <p className="text-muted">Loading…</p>
       ) : data.stats.cycleCount < 2 ? (
         <NotEnoughYet stats={data.stats} onNavigate={onNavigate} />
       ) : (
@@ -124,9 +124,9 @@ function Stats({ stats }: { stats: SummaryStats }) {
       <dl className="m-0 grid grid-cols-2 gap-3 sm:grid-cols-4">
         {tiles.map((t) => (
           <div key={t.label} className={`${card} flex flex-col`}>
-            <dt className="text-xs font-bold text-[var(--muted)]">{t.label}</dt>
-            <dd className="m-0 mt-1 text-xl font-extrabold text-[var(--ink)]">{t.value}</dd>
-            {t.note && <dd className="m-0 mt-0.5 text-xs text-[var(--muted)]">{t.note}</dd>}
+            <dt className="text-xs font-bold text-muted">{t.label}</dt>
+            <dd className="m-0 mt-1 text-xl font-extrabold text-ink">{t.value}</dd>
+            {t.note && <dd className="m-0 mt-0.5 text-xs text-muted">{t.note}</dd>}
           </div>
         ))}
       </dl>
@@ -134,26 +134,22 @@ function Stats({ stats }: { stats: SummaryStats }) {
   )
 }
 
-function Swatch({ style }: { style: CSSProperties }) {
-  return <span aria-hidden="true" className="inline-block h-3 w-3 shrink-0 rounded-[3px]" style={style} />
+function Swatch({ className }: { className: string }) {
+  return <span aria-hidden="true" className={`inline-block h-3 w-3 shrink-0 rounded-[3px] ${className}`} />
 }
 
-const HATCH_STYLE: CSSProperties = {
-  backgroundColor: REST_FILL,
-  backgroundImage: 'repeating-linear-gradient(45deg, var(--accent) 0 1.5px, transparent 1.5px 5px)',
-}
 
 function CycleTooltip({ active, payload }: { active?: boolean; payload?: { payload: CycleBar }[] }) {
   const bar = payload?.[0]?.payload
   if (!active || !bar) return null
   return (
-    <div className="rounded-[var(--radius-sm)] border border-[var(--line-strong)] bg-[var(--panel-strong)] px-3 py-2 text-xs text-[var(--ink)] shadow-[var(--shadow-card)]">
+    <div className="rounded-fas-sm border border-line-strong bg-popover px-3 py-2 text-xs text-ink shadow-[var(--shadow-card)]">
       <p className="m-0 font-bold">
         Cycle {bar.index} · {formatDayMonth(bar.start)}
       </p>
       <p className="m-0">{plural(bar.length, 'day')}</p>
-      <p className="m-0 text-[var(--muted)]">{bar.periodUnknown ? 'Period end not logged' : `Period ${plural(bar.periodDays, 'day')}`}</p>
-      {bar.outlier && <p className="m-0 text-[var(--muted)]">Left out of the average</p>}
+      <p className="m-0 text-muted">{bar.periodUnknown ? 'Period end not logged' : `Period ${plural(bar.periodDays, 'day')}`}</p>
+      {bar.outlier && <p className="m-0 text-muted">Left out of the average</p>}
     </div>
   )
 }
@@ -180,20 +176,20 @@ function CycleChart({ rows, chart, stats }: { rows: CycleRow[]; chart: ReturnTyp
         <h2 id="cycle-chart-title" className="m-0 text-base font-bold">
           Cycle length
         </h2>
-        <figcaption className="mt-1 text-sm text-[var(--muted)]">{summary}</figcaption>
-        <ul className="m-0 mt-3 flex list-none flex-wrap gap-x-4 gap-y-1 p-0 text-xs text-[var(--ink)]" aria-label="Legend">
+        <figcaption className="mt-1 text-sm text-muted">{summary}</figcaption>
+        <ul className="m-0 mt-3 flex list-none flex-wrap gap-x-4 gap-y-1 p-0 text-xs text-ink" aria-label="Legend">
           <li className="flex items-center gap-1.5">
-            <Swatch style={{ background: PERIOD_FILL }} /> Period days
+            <Swatch className="bg-accent" /> Period days
           </li>
           <li className="flex items-center gap-1.5">
-            <Swatch style={{ background: REST_FILL }} /> Rest of cycle
+            <Swatch className="bg-chart-rest" /> Rest of cycle
           </li>
           <li className="flex items-center gap-1.5">
-            <span aria-hidden="true" className="inline-block h-0.5 w-4 bg-[var(--muted)]" /> Average ({plural(avg, 'day')})
+            <span aria-hidden="true" className="inline-block h-0.5 w-4 bg-muted" /> Average ({plural(avg, 'day')})
           </li>
           {hasOutlier && (
             <li className="flex items-center gap-1.5">
-              <Swatch style={HATCH_STYLE} /> Left out (under 15 days)
+              <Swatch className="bg-chart-rest bg-[image:var(--outlier-pattern)]" /> Left out (under 15 days)
             </li>
           )}
         </ul>
@@ -270,7 +266,7 @@ function CycleTable({ rows }: { rows: CycleRow[] }) {
         <table className="w-full border-collapse text-left text-sm">
           <caption className="sr-only">All complete cycles, newest first</caption>
           <thead>
-            <tr className="text-xs text-[var(--muted)]">
+            <tr className="text-xs text-muted">
               <th scope="col" className="py-1 pr-2 font-bold">
                 Started
               </th>
@@ -284,13 +280,13 @@ function CycleTable({ rows }: { rows: CycleRow[] }) {
           </thead>
           <tbody>
             {[...rows].reverse().map((r) => (
-              <tr key={r.index} className="border-t border-[var(--line)]">
+              <tr key={r.index} className="border-t border-line">
                 <th scope="row" className="py-1 pr-2 font-normal">
                   {formatLong(r.start)}
                 </th>
                 <td className="py-1 pr-2">
                   {plural(r.length, 'day')}
-                  {r.outlier && <span className="text-[var(--muted)]"> (left out)</span>}
+                  {r.outlier && <span className="text-muted"> (left out)</span>}
                 </td>
                 <td className="py-1">{r.periodLength === undefined ? '–' : plural(r.periodLength, 'day')}</td>
               </tr>
@@ -309,7 +305,7 @@ function Heatmap({ grid }: { grid: BinnedGrid }) {
         <h2 id="heatmap-title" className="m-0 text-base font-bold">
           Symptoms by cycle day
         </h2>
-        <p className="mb-0 mt-2 text-sm text-[var(--muted)]">
+        <p className="mb-0 mt-2 text-sm text-muted">
           No symptoms logged during your complete cycles yet. Add them when you log a day and patterns show up here.
         </p>
       </section>
@@ -320,7 +316,7 @@ function Heatmap({ grid }: { grid: BinnedGrid }) {
       <h2 id="heatmap-title" className="m-0 text-base font-bold">
         Symptoms by cycle day
       </h2>
-      <p className="mb-0 mt-1 text-sm text-[var(--muted)]">
+      <p className="mb-0 mt-1 text-sm text-muted">
         The share of cycle days in each range with the symptom logged. Day 1 is the first day of a period.
       </p>
       <div className="mt-3 overflow-x-auto" role="region" aria-labelledby="heatmap-title" tabIndex={0}>
@@ -330,11 +326,11 @@ function Heatmap({ grid }: { grid: BinnedGrid }) {
           </caption>
           <thead>
             <tr>
-              <th scope="col" className="px-1 py-1 text-left font-bold text-[var(--muted)]">
+              <th scope="col" className="px-1 py-1 text-left font-bold text-muted">
                 Symptom
               </th>
               {grid.columns.map((c) => (
-                <th key={c.from} scope="col" className="min-w-11 px-1 py-1 font-bold text-[var(--muted)]">
+                <th key={c.from} scope="col" className="min-w-11 px-1 py-1 font-bold text-muted">
                   {c.label.replace('Days ', '')}
                 </th>
               ))}
@@ -343,7 +339,7 @@ function Heatmap({ grid }: { grid: BinnedGrid }) {
           <tbody>
             {grid.rows.map((r) => (
               <tr key={r.symptom}>
-                <th scope="row" className="whitespace-nowrap px-1 py-1 text-left font-semibold text-[var(--ink)]">
+                <th scope="row" className="whitespace-nowrap px-1 py-1 text-left font-semibold text-ink">
                   {r.label}
                 </th>
                 {r.cells.map((cell, i) => {
@@ -352,12 +348,12 @@ function Heatmap({ grid }: { grid: BinnedGrid }) {
                     <td
                       key={grid.columns[i].from}
                       title={`${r.label}, ${grid.columns[i].label.toLowerCase()}: ${cell.count} of ${cell.days} cycle days (${pct}%)`}
-                      className="rounded-[4px] px-1 py-1.5 tabular-nums text-[var(--ink)]"
+                      className="rounded-[4px] px-1 py-1.5 tabular-nums text-ink"
                       style={{ background: heat(cell.freq) }}
                     >
                       {cell.count === 0 ? (
                         <>
-                          <span aria-hidden="true" className="text-[var(--muted)]">
+                          <span aria-hidden="true" className="text-muted">
                             –
                           </span>
                           <span className="sr-only">0%</span>
@@ -373,10 +369,10 @@ function Heatmap({ grid }: { grid: BinnedGrid }) {
           </tbody>
         </table>
       </div>
-      <div className="mt-2 flex items-center gap-2 text-xs text-[var(--muted)]" aria-hidden="true">
+      <div className="mt-2 flex items-center gap-2 text-xs text-muted" aria-hidden="true">
         <span>0%</span>
         {[0, 0.25, 0.5, 0.75, 1].map((f) => (
-          <span key={f} className="inline-block h-3 w-6 rounded-[3px] border border-[var(--line)]" style={{ background: heat(f) }} />
+          <span key={f} className="inline-block h-3 w-6 rounded-[3px] border border-line" style={{ background: heat(f) }} />
         ))}
         <span>100%</span>
       </div>

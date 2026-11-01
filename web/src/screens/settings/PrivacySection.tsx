@@ -13,13 +13,13 @@ import { LOCAL_PRIVACY, STORAGE_WARNING } from '../../privacy/copy'
 import type { ReminderService } from '../../reminders'
 import { type SyncEngine, useSyncStatus } from '../../sync'
 
-const card = 'rounded-[var(--radius)] border border-[var(--line)] bg-[var(--panel)] p-4'
+const card = 'rounded-fas border border-line bg-panel p-4'
 
 function Topic({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div>
       <h3 className="m-0 text-sm font-bold">{title}</h3>
-      <div className="mt-1 flex flex-col gap-1 text-sm text-[var(--muted)]">{children}</div>
+      <div className="mt-1 flex flex-col gap-1 text-sm text-muted">{children}</div>
     </div>
   )
 }
@@ -106,9 +106,9 @@ export function PrivacySection({
           </p>
         </Topic>
 
-        <div className="border-t border-[var(--line)] pt-4">
+        <div className="border-t border-line pt-4">
           <h3 className="m-0 text-sm font-bold">Delete all data</h3>
-          <p className="mb-0 mt-1 text-sm text-[var(--muted)]">
+          <p className="mb-0 mt-1 text-sm text-muted">
             Removes everything Cycle has stored on this device and, if you're signed in, the encrypted copy and any
             reminders in your account. Make a backup first if you might want it back.
           </p>

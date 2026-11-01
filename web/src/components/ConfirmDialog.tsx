@@ -13,7 +13,7 @@ export function ConfirmDialog({ open, title, message, confirmLabel = 'Confirm', 
 }) {
   return (
     <Sheet open={open} title={title} onClose={onCancel}>
-      <p className="mt-0 text-sm text-[var(--muted)]">{message}</p>
+      <p className="mt-0 text-sm text-muted">{message}</p>
       <div className="flex flex-wrap justify-end gap-2">
         <button type="button" className={secondaryButton} onClick={onCancel}>Cancel</button>
         <button type="button" className={variant === 'danger' ? dangerButton : primaryButton} onClick={onConfirm}>{confirmLabel}</button>

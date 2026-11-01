@@ -77,7 +77,7 @@ function Screen({
       return <CalendarScreen today={today} />
     case '/insights':
       return (
-        <Suspense fallback={<p className="text-[var(--muted)]">Loading…</p>}>
+        <Suspense fallback={<p className="text-muted">Loading…</p>}>
           <InsightsScreen onNavigate={onNavigate} />
         </Suspense>
       )

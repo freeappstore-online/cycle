@@ -115,7 +115,7 @@ function Steps({ today, onDone }: { today: ISODate; onDone: () => void }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="m-0 text-xs font-bold text-[var(--ink)]">
+      <p className="m-0 text-xs font-bold text-ink">
         Step {step} of {STEPS}
       </p>
       <h3 ref={heading} tabIndex={-1} className="m-0 text-lg font-bold outline-none">

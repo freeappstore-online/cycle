@@ -10,7 +10,7 @@ import type { ISODate } from '../../data/types'
 import { addMonths } from '../../predict'
 import { buildSummary } from '../../report/summary'
 
-const card = 'rounded-[var(--radius)] border border-[var(--line)] bg-[var(--panel)] p-4'
+const card = 'rounded-fas border border-line bg-panel p-4'
 
 export function ReportSection({ today }: { today: ISODate }) {
   const repo = useCycleRepo()
@@ -36,7 +36,7 @@ export function ReportSection({ today }: { today: ISODate }) {
       <h2 id="report-heading" className="m-0 text-base font-bold">
         Summary for a doctor
       </h2>
-      <p className="mb-0 mt-2 text-sm text-[var(--muted)]">
+      <p className="mb-0 mt-2 text-sm text-muted">
         A PDF with your periods, cycle lengths and symptoms for a date range. It's made on this device and isn't
         uploaded anywhere.
       </p>

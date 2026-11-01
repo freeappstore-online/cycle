@@ -61,11 +61,11 @@ function DaySheetBody({ date, today, onClose, confirming, setConfirming }: BodyP
       <button type="button" className={secondaryButton} onClick={() => { setLoadError(undefined); setAttempt((value) => value + 1) }}>Retry</button>
     </div>
   )
-  if (!data) return <p className="text-[var(--muted)]">Loading…</p>
+  if (!data) return <p className="text-muted">Loading…</p>
   if (date > today) {
     return (
       <>
-        <p className="mt-0 text-[var(--muted)]">This day hasn't happened yet. You can log it once it arrives.</p>
+        <p className="mt-0 text-muted">This day hasn't happened yet. You can log it once it arrives.</p>
         <button type="button" className={secondaryButton} onClick={onClose}>
           Close
         </button>
@@ -136,7 +136,7 @@ function DayForm({ date, today, initial, periods, periodLength, onClose, confirm
 
   return (
     <>
-      <section aria-label="Period" className="mb-5 rounded-[var(--radius)] border border-[var(--line)] p-3">
+      <section aria-label="Period" className="mb-5 rounded-fas border border-line p-3">
         <p className="m-0 mb-3 flex items-center gap-2 text-sm" aria-live="polite">
           {current ? (
             <>
@@ -149,7 +149,7 @@ function DayForm({ date, today, initial, periods, periodLength, onClose, confirm
               </span>
             </>
           ) : (
-            <span className="text-[var(--muted)]">Not logged as a period day.</span>
+            <span className="text-muted">Not logged as a period day.</span>
           )}
         </p>
         <div className="flex flex-wrap gap-2">
@@ -191,12 +191,12 @@ function DayForm({ date, today, initial, periods, periodLength, onClose, confirm
             onChange={(e) => setNote(e.target.value)}
             rows={3}
             maxLength={2000}
-            className="w-full resize-y rounded-[var(--radius-sm)] border border-[var(--muted)] bg-[var(--panel-strong)] p-3 text-base text-[var(--ink)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sky)]"
+            className="w-full resize-y rounded-fas-sm border border-muted bg-popover p-3 text-base text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky"
           />
         </div>
 
         {error && (
-          <p role="alert" className="m-0 text-sm font-semibold text-[var(--danger)]">
+          <p role="alert" className="m-0 text-sm font-semibold text-danger">
             {error}
           </p>
         )}

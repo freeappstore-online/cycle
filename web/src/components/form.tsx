@@ -3,7 +3,7 @@
 import { type ReactNode, useId, useState } from 'react'
 
 export const input =
-  'w-full rounded-[var(--radius-sm)] border border-[var(--muted)] bg-[var(--panel-strong)] px-3 py-2 text-base text-[var(--ink)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sky)]'
+  'w-full rounded-fas-sm border border-muted bg-panel-strong px-3 py-2 text-base text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky'
 
 /** Runs an async action with busy and error state. */
 export function useAction() {
@@ -58,7 +58,7 @@ export function PassphraseField({
         className={input}
       />
       {hint && (
-        <p id={`${id}-hint`} className="mb-0 mt-1 text-xs text-[var(--muted)]">
+        <p id={`${id}-hint`} className="mb-0 mt-1 text-xs text-muted">
           {hint}
         </p>
       )}
@@ -67,13 +67,13 @@ export function PassphraseField({
 }
 
 export const ErrorText = ({ children }: { children: ReactNode }) => (
-  <p role="alert" className="m-0 text-sm font-semibold text-[var(--danger)]">
+  <p role="alert" className="m-0 text-sm font-semibold text-danger">
     {children}
   </p>
 )
 
 export const Busy = ({ busy, label }: { busy: boolean; label: string }) => (
-  <p role="status" aria-live="polite" className="m-0 text-sm text-[var(--muted)]">
+  <p role="status" aria-live="polite" className="m-0 text-sm text-muted">
     {busy ? label : ''}
   </p>
 )
