@@ -24,6 +24,15 @@ test('signed-in navigation reaches every screen without opening the profile menu
   }
 })
 
+test('exact mobile Menu locator excludes the profile avatar button', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'Mobile menu locator')
+  const menu = page.getByRole('button', { name: 'Menu', exact: true })
+  const profile = page.getByRole('button', { name: 'Profile menu', exact: true })
+  await expect(menu).toHaveCount(1)
+  await expect(profile).toBeVisible()
+  expect(await menu.evaluate((button, avatar) => button === avatar, await profile.elementHandle())).toBe(false)
+})
+
 test('mobile menu supports touch, keyboard dismissal and keyboard navigation', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'Mobile drawer behavior')
   const nav = page.getByRole('navigation', { name: 'Main', exact: true })
