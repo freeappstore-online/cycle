@@ -45,9 +45,10 @@ export { expect }
 
 /** Opens a screen from the main nav (through the menu on phones). */
 export async function go(page: Page, name: 'Today' | 'Calendar' | 'Insights' | 'Settings') {
-  const link = () => page.getByRole('link', { name, exact: true }).filter({ visible: true }).first()
-  if ((await link().count()) === 0) await page.getByRole('button', { name: /menu/i }).click()
-  await link().click()
+  const nav = page.getByRole('navigation', { name: 'Main', exact: true })
+  const link = nav.getByRole('link', { name, exact: true })
+  if (!(await link.isVisible())) await nav.getByRole('button', { name: 'Menu', exact: true }).click()
+  await link.click()
   await expect(page.getByRole('heading', { level: 1, name })).toBeVisible()
 }
 
