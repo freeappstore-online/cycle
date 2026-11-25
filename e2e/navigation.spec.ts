@@ -13,21 +13,21 @@ test.beforeEach(async ({ page }) => {
   await openApp(page)
 })
 
-test('signed-in navigation reaches every screen without opening the profile menu', async ({ page }) => {
-  const profile = page.getByRole('button', { name: 'Profile menu', exact: true })
+test('signed-in navigation reaches every screen without opening the profile', async ({ page }) => {
+  const profile = page.getByRole('link', { name: 'Profile', exact: true })
   await expect(profile).toBeVisible()
   for (const screen of ['Settings', 'Calendar', 'Insights', 'Today'] as const) {
     await go(page, screen)
     await expect(page.getByRole('navigation', { name: 'Main', exact: true })
       .getByRole('link', { name: screen, exact: true, includeHidden: true })).toHaveAttribute('aria-current', 'page')
-    await expect(profile).toHaveAttribute('aria-expanded', 'false')
+    await expect(profile).not.toHaveAttribute('aria-current', 'page')
   }
 })
 
-test('exact mobile Menu locator excludes the profile avatar button', async ({ page, isMobile }) => {
+test('exact mobile Menu locator excludes the profile avatar link', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'Mobile menu locator')
   const menu = page.getByRole('button', { name: 'Menu', exact: true })
-  const profile = page.getByRole('button', { name: 'Profile menu', exact: true })
+  const profile = page.getByRole('link', { name: 'Profile', exact: true })
   await expect(menu).toHaveCount(1)
   await expect(profile).toBeVisible()
   expect(await menu.evaluate((button, avatar) => button === avatar, await profile.elementHandle())).toBe(false)
